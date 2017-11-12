@@ -40,7 +40,7 @@ void before() {
 
 // executed AFTER mysensors has been initialised.
 void setup() {
-  Serial.begin(57600); //Uruchomienie komunikacji
+  Serial.begin(57600);
   // Setup locally attached sensors
   delay(5000);
   // Setup Relays
@@ -62,10 +62,12 @@ void loop() {
   for(int i = 0; i < numberOfButtons; i++) {
     if (myButtonDebouncer[i].update()) {
       int buttonState = myButtonDebouncer[i].read();
+#ifdef MY_DEBUG
       Serial.print("Button ");
       Serial.print(i);
       Serial.print(" changed to: ");
       Serial.println(buttonState);
+#endif
       
       // Button was pushed and now is released
       if (buttonState == LOW) {
@@ -92,9 +94,9 @@ void loop() {
 void presentation()
 {
   // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Relay", "1.0");
+  sendSketchInfo("Multi Relay", "1.0");
 	
-	// Rejestracja każdego przekaźnika jako osobny sensor
+	// Register every relay as separate sensor
   for (int i = 0; i < numberOfRelays; i++) {
     // Register all sensors to gw (they will be created as child devices)
     present(i, S_LIGHT);
