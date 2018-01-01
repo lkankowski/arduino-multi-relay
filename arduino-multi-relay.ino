@@ -33,19 +33,20 @@ void before() {
     pinMode(myRelaysPins[i], OUTPUT);
     // Set relay to last known state (using eeprom storage)
     uint8_t isTurnedOn = loadState(i); // 1 - true, 0 - false
-    uint8_t state = isTurnedOn ? RELAY_TRIGGER_LEVEL : ~RELAY_TRIGGER_LEVEL;
+    uint8_t state = isTurnedOn ? RELAY_TRIGGER_LEVEL : !RELAY_TRIGGER_LEVEL;
     digitalWrite(myRelaysPins[i], state);
   }
 }
 
-// executed AFTER mysensors has been initialised.
+// executed AFTER mysensors has been initialised
 void setup() {
-  Serial.begin(57600);
+  Serial.begin(115200);
   // Setup locally attached sensors
   delay(5000);
   // Setup Relays
   for(int i = 0; i < numberOfRelays; i++) {
     msgs[i] = MyMessage(i, V_LIGHT);
+    send(msgs[i].set(loadState(i))); // send current state
   }
   // Setup buttons
   for(int i = 0; i < numberOfButtons; i++) {
@@ -71,11 +72,11 @@ void loop() {
       
       // Button was pushed and now is released
       if (buttonState == LOW) {
-        uint8_t isTurnedOn = loadState(i); // 1 - true, 0 - false
-        uint8_t newState = isTurnedOn ? ~RELAY_TRIGGER_LEVEL : RELAY_TRIGGER_LEVEL;
-        saveState(i, ~isTurnedOn);
+        uint8_t isTurnedOn = ! loadState(i); // 1 - true, 0 - false
+        uint8_t newState = isTurnedOn ? RELAY_TRIGGER_LEVEL : !RELAY_TRIGGER_LEVEL;
+        saveState(i, isTurnedOn);
         digitalWrite(myRelaysPins[i], newState);
-        send(msgs[i].set(~isTurnedOn));
+        send(msgs[i].set(isTurnedOn));
       }
     }
   }
@@ -91,8 +92,7 @@ void loop() {
 //   sensorType - The sensor type you want to create.
 //   description An optional textual description of the attached sensor.
 //   ack - Set this to true if you want destination node to send ack back to this node. Default is not to request any ack.
-void presentation()
-{
+void presentation() {
   // Send the sketch version information to the gateway and Controller
   sendSketchInfo("Multi Relay", "1.0");
 	
@@ -112,16 +112,18 @@ void receive(const MyMessage &message) {
   // We only expect one type of message from controller. But we better check anyway.
   if (message.type == V_LIGHT) {
     uint8_t isTurnedOn = message.getBool(); // 1 - true, 0 - false
-    uint8_t newState = isTurnedOn ? RELAY_TRIGGER_LEVEL : ~RELAY_TRIGGER_LEVEL;
+    uint8_t newState = isTurnedOn ? RELAY_TRIGGER_LEVEL : !RELAY_TRIGGER_LEVEL;
     // Change relay state
     digitalWrite(myRelaysPins[message.sensor], newState);
     // Store state in eeprom if changed
     if (loadState(message.sensor) != isTurnedOn) {
-      saveState(message.sensor, message.getBool());
+      saveState(message.sensor, isTurnedOn);
     }
+#ifdef MY_DEBUG
     // Write some debug info
     Serial.print("Incoming change for sensor: " + message.sensor);
-    Serial.println(", New status: " + message.getBool());
+    Serial.println(", New status: " + isTurnedOn);
+#endif
   }
 }
 
