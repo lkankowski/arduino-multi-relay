@@ -7,7 +7,6 @@
 #define MY_INCLUSION_MODE_DURATION 60
 #define MY_INCLUSION_MODE_BUTTON_PIN  3
 
-#include <SPI.h>
 #include <MySensors.h>
 #include <Bounce2.h>
 
