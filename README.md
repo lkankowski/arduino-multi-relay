@@ -17,7 +17,7 @@ RelayButton myRelayButtons[] = {
 ```
 
 ## Simple bi-stable switch and relay pair
-Relay is connected to pin 12, button is connected to pin 11, relay is triggered to ON using HIGN state, button is bi-stable
+Relay is connected to pin 12, button is connected to pin 11, relay is triggered to ON using HIGH state, button is bi-stable
 ```
 RelayButton myRelayButtons[] = {
     {12, 11, HIGH, BI_STABLE}
@@ -25,7 +25,7 @@ RelayButton myRelayButtons[] = {
 ```
 
 ## Simple two mono-stable switch for one relay
-Relay is connected to pin 12, buttons are connected to pins 11 and 10, relay is triggered to ON using HIGN state, buttons are mono-stable
+Relay is connected to pin 12, buttons are connected to pins 11 and 10, relay is triggered to ON using HIGH state, buttons are mono-stable
 ```
 RelayButton myRelayButtons[] = {
     {12, 11, HIGH, MONO_STABLE}
