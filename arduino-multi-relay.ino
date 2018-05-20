@@ -10,30 +10,103 @@
 #include <MySensors.h>
 #include <Bounce2.h>
 
+enum ButtonType {
+  MONO_STABLE = 0,
+  BI_STABLE = 1
+};
 
-int myRelaysPins[] = {2, 4, 5, 6, 7, 8, 9, 10};
-int myButtonsPins[] = {A5, A4, A3, A2, A1, A0, 11, 12};
-#define RELAY_TRIGGER_LEVEL LOW
+typedef struct {
+  int relay;
+  int button;
+  uint8_t relayTrigger;
+  ButtonType buttonType;
+} RelayButton;
 
-const int numberOfRelays = sizeof(myRelaysPins) / sizeof(myRelaysPins[0]);
-const int numberOfButtons = sizeof(myButtonsPins) / sizeof(myButtonsPins[0]);
+// CONFIGURE ONLY THIS ARRAY!
+// Row params: relay pin, button pin, relay trigger [HIGH|LOW], button type [MONO_STABLE|BI_STABLE]
+RelayButton myRelayButtons[] = {
+    {12, A0, LOW, MONO_STABLE},
+    {11, A1, LOW, MONO_STABLE},
+    {10, A2, LOW, MONO_STABLE},
+    {9, A3, LOW, MONO_STABLE},
+    {8, A4, LOW, MONO_STABLE},
+    {7, A5, LOW, MONO_STABLE},
+    {6, A6, LOW, MONO_STABLE},
+    {5, A7, LOW, MONO_STABLE},
+    {4, A8, LOW, MONO_STABLE},
+    {3, A9, LOW, MONO_STABLE},
+    {2, A10, LOW, MONO_STABLE},
+    {14, A11, LOW, MONO_STABLE},
+    {15, A12, LOW, MONO_STABLE},
+    {16, A13, LOW, MONO_STABLE},
+    {17, A14, LOW, MONO_STABLE},
+    {18, A15, LOW, MONO_STABLE},
+    {19, 53, LOW, MONO_STABLE},
+    {20, 52, LOW, MONO_STABLE},
+    {21, 51, LOW, MONO_STABLE},
+    {22, 50, LOW, MONO_STABLE},
+    {23, 49, LOW, MONO_STABLE},
+    {24, 48, LOW, MONO_STABLE},
+    {25, 47, LOW, MONO_STABLE},
+    {26, 46, LOW, MONO_STABLE},
+    {27, 45, LOW, MONO_STABLE},
+    {28, 44, LOW, MONO_STABLE},
+    {29, 43, LOW, MONO_STABLE},
+    {30, 42, LOW, MONO_STABLE},
+    {31, 41, LOW, MONO_STABLE},
+    {32, 40, LOW, MONO_STABLE},
+    {33, 39, LOW, MONO_STABLE},
+    {34, 38, LOW, MONO_STABLE}
+};
+
+const int numberOfRelayButtons = sizeof(myRelayButtons) / sizeof(RelayButton);
+
+typedef struct {
+  int firstButton;
+  int nextButton;
+} RelayMultiButtons;
+
+RelayMultiButtons relayMultiButtons[numberOfRelayButtons];
 
 // MySensors - Sending Data
 // To send data you have to create a MyMessage container to hold the information.
-MyMessage msgs[numberOfRelays];
+MyMessage msgs[numberOfRelayButtons];
 
-Bounce myButtonDebouncer[numberOfButtons];
+Bounce myButtonDebouncer[numberOfRelayButtons];
 
 
 // MySensors - This will execute before MySensors starts up
 void before() {
-  for (int i = 0; i < numberOfRelays; i++) {
-    // Then set relay pins in output mode
-    pinMode(myRelaysPins[i], OUTPUT);
-    // Set relay to last known state (using eeprom storage)
-    uint8_t isTurnedOn = loadState(i); // 1 - true, 0 - false
-    uint8_t state = isTurnedOn ? RELAY_TRIGGER_LEVEL : !RELAY_TRIGGER_LEVEL;
-    digitalWrite(myRelaysPins[i], state);
+  // initialize multiple buttons list structure
+  for (int i = 0; i < numberOfRelayButtons; i++) {
+    relayMultiButtons[i].firstButton = -1;
+    relayMultiButtons[i].nextButton = -1;
+  }
+  // find multiple buttons for the same relay (uni-directional list)
+  for (int i = 0; i < numberOfRelayButtons-1; i++) {
+    if (relayMultiButtons[i].firstButton == -1) {
+      int prevRelayButton = i;
+      for (int j = i+1; j < numberOfRelayButtons; j++) {
+        if (myRelayButtons[i].relay == myRelayButtons[j].relay) {
+          relayMultiButtons[prevRelayButton].firstButton = i;
+          relayMultiButtons[prevRelayButton].nextButton = j;
+          relayMultiButtons[j].firstButton = i;
+          prevRelayButton = j;
+        }
+      }
+    }
+  }
+  
+  for (int i = 0; i < numberOfRelayButtons; i++) {
+    // if this relay has multiple buttons, load only first
+    if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
+      // Then set relay pins in output mode
+      pinMode(myRelayButtons[i].relay, OUTPUT);
+      // Set relay to last known state (using eeprom storage)
+      uint8_t isTurnedOn = loadState(i); // 1 - true, 0 - false
+      uint8_t state = isTurnedOn ? myRelayButtons[i].relayTrigger : ! myRelayButtons[i].relayTrigger;
+      digitalWrite(myRelayButtons[i].relay, state);
+    }
   }
 }
 
@@ -43,23 +116,26 @@ void setup() {
   // Setup locally attached sensors
   delay(5000);
   // Setup Relays
-  for(int i = 0; i < numberOfRelays; i++) {
-    msgs[i] = MyMessage(i, V_LIGHT);
-    send(msgs[i].set(loadState(i))); // send current state
+  for(int i = 0; i < numberOfRelayButtons; i++) {
+    // if this relay has multiple buttons, send only first
+    if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
+      msgs[i] = MyMessage(i, V_LIGHT);
+      send(msgs[i].set(loadState(i))); // send current state
+    }
   }
   // Setup buttons
-  for(int i = 0; i < numberOfButtons; i++) {
-    pinMode(myButtonsPins[i], INPUT_PULLUP);
+  for(int i = 0; i < numberOfRelayButtons; i++) {
+    pinMode(myRelayButtons[i].button, INPUT_PULLUP);
     // After setting up the button, setup debouncer.
     myButtonDebouncer[i] = Bounce();
-    myButtonDebouncer[i].attach(myButtonsPins[i]);
-    myButtonDebouncer[i].interval(5);
+    myButtonDebouncer[i].attach(myRelayButtons[i].button);
+    myButtonDebouncer[i].interval(50);
   }
   //presentation();
 }
 
 void loop() {
-  for(int i = 0; i < numberOfButtons; i++) {
+  for(int i = 0; i < numberOfRelayButtons; i++) {
     if (myButtonDebouncer[i].update()) {
       int buttonState = myButtonDebouncer[i].read();
 #ifdef MY_DEBUG
@@ -69,12 +145,13 @@ void loop() {
       Serial.println(buttonState);
 #endif
       
-      // Button was pushed and now is released
-      if (buttonState == LOW) {
+      // If button type is BI_STABLE, any change will toggle relay state
+      // For MONO_STABLE, button must be pushed and released
+      if (myRelayButtons[i].buttonType == BI_STABLE || buttonState == LOW) {
         uint8_t isTurnedOn = ! loadState(i); // 1 - true, 0 - false
-        uint8_t newState = isTurnedOn ? RELAY_TRIGGER_LEVEL : !RELAY_TRIGGER_LEVEL;
+        uint8_t newState = isTurnedOn ? myRelayButtons[i].relayTrigger : ! myRelayButtons[i].relayTrigger;
         saveState(i, isTurnedOn);
-        digitalWrite(myRelaysPins[i], newState);
+        digitalWrite(myRelayButtons[i].relay, newState);
         send(msgs[i].set(isTurnedOn));
       }
     }
@@ -93,12 +170,15 @@ void loop() {
 //   ack - Set this to true if you want destination node to send ack back to this node. Default is not to request any ack.
 void presentation() {
   // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Multi Relay", "1.0");
+  sendSketchInfo("Multi Relay", "1.1");
 	
 	// Register every relay as separate sensor
-  for (int i = 0; i < numberOfRelays; i++) {
-    // Register all sensors to gw (they will be created as child devices)
-    present(i, S_LIGHT);
+  for (int i = 0; i < numberOfRelayButtons; i++) {
+    // if this relay has multiple buttons, load only once
+    if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
+      // Register all sensors to gw (they will be created as child devices)
+      present(i, S_LIGHT);
+    }
   }
 }
 
@@ -111,9 +191,9 @@ void receive(const MyMessage &message) {
   // We only expect one type of message from controller. But we better check anyway.
   if (message.type == V_LIGHT) {
     uint8_t isTurnedOn = message.getBool(); // 1 - true, 0 - false
-    uint8_t newState = isTurnedOn ? RELAY_TRIGGER_LEVEL : !RELAY_TRIGGER_LEVEL;
+    uint8_t newState = isTurnedOn ? myRelayButtons[message.sensor].relayTrigger : ! myRelayButtons[message.sensor].relayTrigger;
     // Change relay state
-    digitalWrite(myRelaysPins[message.sensor], newState);
+    digitalWrite(myRelayButtons[message.sensor].relay, newState);
     // Store state in eeprom if changed
     if (loadState(message.sensor) != isTurnedOn) {
       saveState(message.sensor, isTurnedOn);
