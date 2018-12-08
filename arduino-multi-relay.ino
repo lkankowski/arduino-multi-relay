@@ -1,6 +1,6 @@
 // Enable debug prints to serial monitor
 #define USE_EXPANDER
-#define MY_DEBUG
+//#define MY_DEBUG
 
 #define MY_GATEWAY_SERIAL
 
@@ -49,11 +49,11 @@ typedef struct {
 
 // CONFIGURE ONLY THIS ARRAY!
 // Row params: sensor ID - sensor ID for Domoticz
-//             relay pin - <0 for virtual buttons (only available in Domoticz); no support for Expander
-//             button pin - Expander supported
+//             relay pin - Expander supported
+//             button pin - <0 for virtual buttons (only available in Domoticz); no support for Expander
 //             relay options - [RELAY_TRIGGER_LOW|RELAY_TRIGGER_HIGH] {RELAY_STARTUP_ON|RELAY_STARTUP_OFF}
 //             button type - [MONO_STABLE|BI_STABLE|DING_DONG]
-//             relayDescription - visible in Domoticz, helps initial configuration
+//             relay description - visible in Domoticz, helps initial configuration
 RelayButton myRelayButtons[] = {
   {0, 2, A0, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - kinkiet [C10]"},  // WŁ: Ł2
   {1, 16, A1, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 2 [A9]"},  // WŁ: Salon 2
@@ -65,13 +65,13 @@ RelayButton myRelayButtons[] = {
   {7, 30, A7, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 1 [A6]"},  // WŁ: Hall I/Jadalnia 2
   {8, 31, A8, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Kotłownia/Garaż
   {-1, 31, A9, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Garaż
-  {10, 14, A10, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, BI_STABLE, "Halogen - wejście [B4]"},  // WŁ: Drzwi wejściowe
+  {10, 14, A10, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, BI_STABLE, "Halogen - wejście [B4]"},  // WŁ: Drzwi wejściowe
   {11, E07, A11, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, DING_DONG, "Dzwonek [?]"},  // WŁ: Dzwonek
   {12, 29, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Jadalnia 1
   {-1, 29, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Wiatrołap
   {14, 32, A14, RELAY_TRIGGER_LOW, BI_STABLE, "Wiatrołap [A8]"},  // WŁ: Wiatrołap/Hall I
   {15, 19, A15, RELAY_TRIGGER_LOW, MONO_STABLE, "Kotłownia [B1]"},  // WŁ: Kotłownia/Hall I
-  {16, 24, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Taśma LED [?]"},  // WŁ: Hall I/Ł1 1
+  {16, 17, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Taśma LED [?]"},  // WŁ: Hall I/Ł1 1
   {17, 17, 52, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Ł1
   {18, 18, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 [A12]"},  // WŁ: Hall I/Ł1 2
   {19, 6, 50, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall I/Schody 1
@@ -89,7 +89,7 @@ RelayButton myRelayButtons[] = {
   {-1, 7, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2 [B5]"},  // WŁ: Hall II/Sypialnia
   {32, 11, 37, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 2 [C9]"},  // WŁ: Sypialnia 2
   {33, 12, 36, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 1 [C8]"},  // WŁ: Sypialnia 1
-  {34, 25, -1, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - Garaż [A1]"},  // WŁ: Virtual Button 1
+  {34, 25, -1, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, MONO_STABLE, "Halogen - Garaż [A1]"},  // WŁ: Virtual Button 1
   {35, 27, -2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł1 - Wentylator [A3]"},  // WŁ: Virtual Button 2
   {36, E02, -3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - wschód [B6]"},  // WŁ: Virtual Button 3
   {37, E04, -4, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki schodowe [C6]"},  // WŁ: Virtual Button 4
@@ -117,6 +117,8 @@ Bounce myButtonDebouncer[numberOfRelayButtons];
 //Function Declaration
 uint8_t loadRelayState(int relayNum, uint8_t forceEeprom = 0);
 void saveRelayState(int relayNum, uint8_t state, uint8_t useEeprom);
+void saveRelayState(int relayNum, uint8_t state);
+void changeRelayState(int relayNum, uint8_t relayState);
 
 
 
@@ -157,7 +159,7 @@ void before() {
     if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
       // Then set relay pins in output mode
       #ifdef USE_EXPANDER
-        if ( myRelayButtons[i].relay >= 0x0100 ) {
+        if ( myRelayButtons[i].relay & 0x0100 ) {
           // EXPANDER
           expander0.pinMode(myRelayButtons[i].relay & 0xf, OUTPUT);
         } else {
@@ -168,7 +170,6 @@ void before() {
       #endif
       
       uint8_t isTurnedOn = 0;
-      uint8_t relayTrigger = myRelayButtons[i].relayOptions & RELAY_TRIGGER_HIGH;
       
       if (myRelayButtons[i].relayOptions & RELAY_STARTUP_ON) {
         isTurnedOn = 1;
@@ -182,8 +183,7 @@ void before() {
         }
       }
 
-      uint8_t state = isTurnedOn ? relayTrigger : ! relayTrigger;
-      digitalWrite(myRelayButtons[i].relay, state);
+      changeRelayState(i, isTurnedOn);
       myRelayState[i] = isTurnedOn;
     }
   }
@@ -203,7 +203,7 @@ void setup() {
   }
   // Setup locally attached sensors
   delay(5000);
-  // Setup Relays
+  // Send state to Domoticz
   for(int i = 0; i < numberOfRelayButtons; i++) {
     // if this relay has multiple buttons, send only first
     if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
@@ -241,31 +241,23 @@ void loop() {
         Serial.println(buttonState);
       #endif
       
-      int nextButton = (relayMultiButtons[i].firstButton == -1) ? i : relayMultiButtons[i].firstButton;
-      uint8_t relayTrigger = myRelayButtons[nextButton].relayOptions & RELAY_TRIGGER_HIGH;
-      uint8_t useEeprom = ((myRelayButtons[nextButton].relayOptions & RELAY_STARTUP_MASK) == 0);
+      int relayNum = (relayMultiButtons[i].firstButton == -1) ? i : relayMultiButtons[i].firstButton;
       
       if (myRelayButtons[i].buttonType == DING_DONG) {
         if (buttonState == LOW) { // button pressed
-          digitalWrite(myRelayButtons[nextButton].relay, relayTrigger);
-          send(msgs[nextButton].set(1));
+          changeRelayState(relayNum, 1);
+          send(msgs[relayNum].set(1));
         } else { // button released
-          digitalWrite(myRelayButtons[nextButton].relay, ! relayTrigger);
-          send(msgs[nextButton].set(0));
+          changeRelayState(relayNum, 0);
+          send(msgs[relayNum].set(0));
         }
       } else if (myRelayButtons[i].buttonType == BI_STABLE || buttonState == HIGH) {
         // If button type is BI_STABLE, any change will toggle relay state
         // For MONO_STABLE, button must be pushed and released (HIGH)
-        uint8_t isTurnedOn = ! loadRelayState(nextButton); // 1 - true, 0 - false
-        uint8_t newState = isTurnedOn ? relayTrigger : ! relayTrigger;
-        digitalWrite(myRelayButtons[nextButton].relay, newState);
-        send(msgs[nextButton].set(isTurnedOn));
-        
-        // update state in eeprom for all buttons
-        do {
-          saveRelayState(nextButton, isTurnedOn, useEeprom);
-          nextButton = relayMultiButtons[nextButton].nextButton;
-        } while (nextButton != -1);
+        uint8_t isTurnedOn = ! loadRelayState(relayNum); // 1 - true, 0 - false
+        changeRelayState(relayNum, isTurnedOn);
+        send(msgs[relayNum].set(isTurnedOn));
+        saveRelayState(relayNum, isTurnedOn);
       }
     }
   }
@@ -305,14 +297,10 @@ void receive(const MyMessage &message) {
   // We only expect one type of message from controller. But we better check anyway.
   if (message.type == V_STATUS) {
     uint8_t isTurnedOn = message.getBool(); // 1 - true, 0 - false
-    uint8_t relayTrigger = myRelayButtons[message.sensor].relayOptions & RELAY_TRIGGER_HIGH;
-    uint8_t useEeprom = ((myRelayButtons[message.sensor].relayOptions & RELAY_STARTUP_MASK) == 0);
-    uint8_t newState = isTurnedOn ? relayTrigger : ! relayTrigger;
-    // Change relay state
-    digitalWrite(myRelayButtons[message.sensor].relay, newState);
+    changeRelayState(message.sensor, isTurnedOn);
     // Store state in eeprom if changed
     if (loadRelayState(message.sensor) != isTurnedOn) {
-      saveRelayState(message.sensor, isTurnedOn, useEeprom);
+      saveRelayState(message.sensor, isTurnedOn);
     }
     send(msgs[message.sensor].set(isTurnedOn)); // support for OPTIMISTIC=FALSE (Home Asistant)
     #ifdef MY_DEBUG
@@ -345,8 +333,38 @@ uint8_t loadRelayState(int relayNum, uint8_t forceEeprom) {
 }
 
 void saveRelayState(int relayNum, uint8_t state, uint8_t useEeprom) {
-  myRelayState[relayNum] = state;
-  if (useEeprom) {
-    saveState(RELAY_STATE_STORAGE + relayNum, state);
+  
+  int mainRelayNum = (relayMultiButtons[relayNum].firstButton == -1) ? relayNum : relayMultiButtons[relayNum].firstButton;
+  
+  myRelayState[mainRelayNum] = state;
+  if (useEeprom && (relayNum == mainRelayNum)) {
+    saveState(RELAY_STATE_STORAGE + mainRelayNum, state);
   }
+  
+  int nextButton = mainRelayNum;
+  // update all buttons
+  while ((nextButton = relayMultiButtons[nextButton].nextButton) != -1) {
+    myRelayState[nextButton] = state;
+  };
+}
+
+void saveRelayState(int relayNum, uint8_t state) {
+  uint8_t useEeprom = ((myRelayButtons[relayNum].relayOptions & RELAY_STARTUP_MASK) == 0);
+  saveRelayState(relayNum, state, useEeprom);
+}
+
+void changeRelayState(int relayNum, uint8_t relayState) {
+  
+  uint8_t relayTrigger = myRelayButtons[relayNum].relayOptions & RELAY_TRIGGER_HIGH;
+  uint8_t digitalOutState = relayState ? relayTrigger : ! relayTrigger;
+  
+  #ifdef USE_EXPANDER
+    if ( myRelayButtons[relayNum].relay & 0x0100 ) {
+      expander0.digitalWrite(myRelayButtons[relayNum].relay & 0xf, digitalOutState);
+    } else {
+  #endif
+    digitalWrite(myRelayButtons[relayNum].relay, digitalOutState);
+  #ifdef USE_EXPANDER
+    }
+  #endif
 }
