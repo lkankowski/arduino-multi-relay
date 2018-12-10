@@ -24,7 +24,7 @@ Params description:
 ** MONO_STABLE - GND connected to the button pin
 ** BI_STABLE - state change from LOW to HIGH and HIGH to LOW, used with mechanical and touch buttons
 ** DING_DONG - doorbell button, relay is triggered only when button is pushed (experimental)
-* relay description - visible in Domoticz, helps initial configuration (can be null - "")
+* relay description - visible in Domoticz/Home Assistant, helps initial configuration (can be null - "")
 
 In my case, I have a documentation of whole electricity of my house in Google Calc, and I have a formula to generate this configuration.
 
