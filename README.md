@@ -14,17 +14,17 @@ RelayButton myRelayButtons[] = {
 };
 ```
 Params description:
-* sensor ID - sensor ID for Domoticz, must be unique (can be -1 when it is not reported to Domoticz)
+* sensor ID - sensor ID reported on MySensor Gateway (ie. Domoticz/Home Assistant), must be unique (can be -1 when it is not reported MySensor Gateway)
 * relay pin - pin connected to the relay. Expander is supported (see details inseparate section)
-* button pin - pin connected to the button. There can be multiple buttons to the same relay. "<0" for virtual buttons (only available in Domoticz). There is no support for Expander because of de-bouncing.
+* button pin - pin connected to the button. There can be multiple buttons to the same relay. "<0" for virtual buttons (only available in MySensor Gateway, ie. Domoticz/Home Assistant). There is no support for Expander because of de-bouncing.
 * relay options - combined with '|' operator:
-** trigger level - RELAY_TRIGGER_LOW or RELAY_TRIGGER_HIGH
-** startup state - optional, RELAY_STARTUP_ON or RELAY_STARTUP_OFF
+  * trigger level - RELAY_TRIGGER_LOW or RELAY_TRIGGER_HIGH
+  * startup state - optional, RELAY_STARTUP_ON or RELAY_STARTUP_OFF
 * button type:
-** MONO_STABLE - GND connected to the button pin
-** BI_STABLE - state change from LOW to HIGH and HIGH to LOW, used with mechanical and touch buttons
-** DING_DONG - doorbell button, relay is triggered only when button is pushed (experimental)
-* relay description - visible in Domoticz, helps initial configuration (can be null - "")
+  * MONO_STABLE - GND connected to the button pin
+  * BI_STABLE - state change from LOW to HIGH and HIGH to LOW, used with mechanical and touch buttons
+  * DING_DONG - doorbell button, relay is triggered only when button is pushed (experimental, not tested)
+* relay description - reported on MySensor Gateway, can help identify device on initial configuration in Home Automation App (ie. Domoticz/Home Assistant), can be empty ("")
 
 In my case, I have a documentation of whole electricity of my house in Google Calc, and I have a formula to generate this configuration.
 
