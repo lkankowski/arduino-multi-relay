@@ -48,12 +48,12 @@ typedef struct {
 } RelayButton;
 
 // CONFIGURE ONLY THIS ARRAY!
-// Row params: sensor ID - sensor ID for Domoticz
+// Row params: sensor ID - sensor ID reported on MySensor Gateway
 //             relay pin - Expander supported
-//             button pin - <0 for virtual buttons (only available in Domoticz); no support for Expander
+//             button pin - <0 for virtual buttons (only available in MySensor Gateway); no support for Expander
 //             relay options - [RELAY_TRIGGER_LOW|RELAY_TRIGGER_HIGH] {RELAY_STARTUP_ON|RELAY_STARTUP_OFF}
 //             button type - [MONO_STABLE|BI_STABLE|DING_DONG]
-//             relay description - visible in Domoticz, helps initial configuration
+//             relay description - reported on MySensor Gateway, can help identify device on initial configuration in Home Automation App, can be empty ("")
 RelayButton myRelayButtons[] = {
   {0, 2, A0, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - kinkiet [C10]"},  // WŁ: Ł2
   {1, 16, A1, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 2 [A9]"},  // WŁ: Salon 2
@@ -203,7 +203,7 @@ void setup() {
   }
   // Setup locally attached sensors
   delay(5000);
-  // Send state to Domoticz
+  // Send state to MySensor Gateway
   for(int i = 0; i < numberOfRelayButtons; i++) {
     // if this relay has multiple buttons, send only first
     if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
