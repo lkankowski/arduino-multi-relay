@@ -70,8 +70,8 @@ RelayButton myRelayButtons[] = {
   {12, 29, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Jadalnia 1
   {-1, 29, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Wiatrołap
   {14, 32, A14, RELAY_TRIGGER_LOW, BI_STABLE, "Wiatrołap [A8]"},  // WŁ: Wiatrołap/Hall I
-  {15, 19, A15, RELAY_TRIGGER_LOW, MONO_STABLE, "Kotłownia [B1]"},  // WŁ: Kotłownia/Hall I
-  {16, 17, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Taśma LED [?]"},  // WŁ: Hall I/Ł1 1
+  {15, 19, A15, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Kotłownia [B1]"},  // WŁ: Kotłownia/Hall I
+  {16, 17, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Hall I/Ł1 1
   {17, 17, 52, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Ł1
   {18, 18, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 [A12]"},  // WŁ: Hall I/Ł1 2
   {19, 6, 50, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall I/Schody 1
@@ -84,8 +84,8 @@ RelayButton myRelayButtons[] = {
   {26, 5, 43, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad kuchnią 1 [B9]"},  // WŁ: Pok. nad kuchnią 1
   {27, 8, 42, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad salonem 2 [B12]"},  // WŁ: Pok. nad salonem 2
   {28, 9, 41, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad salonem 1 [B11]"},  // WŁ: Pok. nad salonem 1
-  {29, 3, 40, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 [C7]"},  // WŁ: Hall II/Ł2 1
-  {30, E03, 39, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - Taśma LED [?]"},  // WŁ: Hall II/Ł2 2
+  {29, 3, 40, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 [C7]"},  // WŁ: Hall II/Ł2 1
+  {30, E03, 39, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 - Taśma LED [?]"},  // WŁ: Hall II/Ł2 2
   {-1, 7, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2 [B5]"},  // WŁ: Hall II/Sypialnia
   {32, 11, 37, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 2 [C9]"},  // WŁ: Sypialnia 2
   {33, 12, 36, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 1 [C8]"},  // WŁ: Sypialnia 1
@@ -283,7 +283,7 @@ void presentation() {
       //   sensorType - The sensor type you want to create.
       //   description An optional textual description of the attached sensor.
       //   ack - Set this to true if you want destination node to send ack back to this node. Default is not to request any ack.
-      present(i, S_BINARY, myRelayButtons[i].relayDescription);
+      present(myRelayButtons[i].sensorId, S_BINARY, myRelayButtons[i].relayDescription);
     }
   }
 }
