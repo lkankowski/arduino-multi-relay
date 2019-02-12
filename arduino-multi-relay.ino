@@ -9,16 +9,12 @@
 #ifdef USE_EXPANDER
   #include <Wire.h>    // Required for I2C communication
   #include "PCF8574.h" // Required for PCF8574
-  PCF8574 expander0;
+  uint8_t expanderAddresses[] = {0x20};
+  const int numberOfExpanders = sizeof(expanderAddresses);
+  PCF8574 expander[numberOfExpanders];
   // Expander constants
-  #define E00 0x0100
-  #define E01 0x0101
-  #define E02 0x0102
-  #define E03 0x0103
-  #define E04 0x0104
-  #define E05 0x0105
-  #define E06 0x0106
-  #define E07 0x0107
+  #define E(expanderNo, ExpanderPin) ((expanderNo+1)<<8 | (ExpanderPin))
+  //#define E00 0x0100
 #endif
 
 // No Button Constant
@@ -58,7 +54,7 @@ RelayButton myRelayButtons[] = {
   {0, 2, A0, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - kinkiet [C10]"},  // WŁ: Ł2
   {1, 16, A1, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 2 [A9]"},  // WŁ: Salon 2
   {2, 15, A2, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 1 [A10]"},  // WŁ: Salon 1
-  {3, E01, A3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, BI_STABLE, "Halogen - Taras [B8]"},  // WŁ: Taras
+  {3, E(0,1), A3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, BI_STABLE, "Halogen - Taras [B8]"},  // WŁ: Taras
   {4, 22, A4, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia [B2]"},  // WŁ: Kuchnia 1
   {5, 23, A5, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia - Kinkiet [B3]"},  // WŁ: Kuchnia 2
   {6, 28, A6, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 2 [A4]"},  // WŁ: Hall I/Jadalnia 3
@@ -66,12 +62,12 @@ RelayButton myRelayButtons[] = {
   {8, 31, A8, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Kotłownia/Garaż
   {-1, 31, A9, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Garaż
   {10, 14, A10, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, BI_STABLE, "Halogen - wejście [B4]"},  // WŁ: Drzwi wejściowe
-  {11, E07, A11, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, DING_DONG, "Dzwonek [?]"},  // WŁ: Dzwonek
+  {11, E(0,7), A11, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, DING_DONG, "Dzwonek [?]"},  // WŁ: Dzwonek
   {12, 29, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Jadalnia 1
   {-1, 29, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Wiatrołap
   {14, 32, A14, RELAY_TRIGGER_LOW, BI_STABLE, "Wiatrołap [A8]"},  // WŁ: Wiatrołap/Hall I
-  {15, 19, A15, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Kotłownia [B1]"},  // WŁ: Kotłownia/Hall I
-  {16, 17, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Hall I/Ł1 1
+  {15, 19, A15, RELAY_TRIGGER_LOW, MONO_STABLE, "Kotłownia [B1]"},  // WŁ: Kotłownia/Hall I
+  {16, 24, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - LED"},  // WŁ: Hall I/Ł1 1
   {17, 17, 52, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Ł1
   {18, 18, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 [A12]"},  // WŁ: Hall I/Ł1 2
   {19, 6, 50, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall I/Schody 1
@@ -81,21 +77,21 @@ RelayButton myRelayButtons[] = {
   {-1, 6, 46, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall II/Schody 2
   {24, 10, 45, RELAY_TRIGGER_LOW, BI_STABLE, "Garderoba [C12]"},  // WŁ: Garderoba
   {25, 4, 44, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad kuchnią 2 [B10]"},  // WŁ: Pok. nad kuchnią 2
-  {26, 5, 43, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad kuchnią 1 [B9]"},  // WŁ: Pok. nad kuchnią 1
-  {27, 8, 42, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad salonem 2 [B12]"},  // WŁ: Pok. nad salonem 2
+  {26, 5, 43, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad kuchnią 1 [B9]"},  // WŁ: Pok. nad kuchnią 1
+  {27, 8, 42, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad salonem 2 [B12]"},  // WŁ: Pok. nad salonem 2
   {28, 9, 41, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad salonem 1 [B11]"},  // WŁ: Pok. nad salonem 1
   {29, 3, 40, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 [C7]"},  // WŁ: Hall II/Ł2 1
-  {30, E03, 39, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 - Taśma LED [?]"},  // WŁ: Hall II/Ł2 2
+  {30, E(0,3), 39, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 - Taśma LED [?]"},  // WŁ: Hall II/Ł2 2
   {-1, 7, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2 [B5]"},  // WŁ: Hall II/Sypialnia
   {32, 11, 37, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 2 [C9]"},  // WŁ: Sypialnia 2
   {33, 12, 36, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 1 [C8]"},  // WŁ: Sypialnia 1
   {34, 25, -1, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, MONO_STABLE, "Halogen - Garaż [A1]"},  // WŁ: Virtual Button 1
   {35, 27, -2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł1 - Wentylator [A3]"},  // WŁ: Virtual Button 2
-  {36, E02, -3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - wschód [B6]"},  // WŁ: Virtual Button 3
-  {37, E04, -4, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki schodowe [C6]"},  // WŁ: Virtual Button 4
-  {38, E05, -5, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki podłogowe I [C4]"},  // WŁ: Virtual Button 5
-  {39, E06, -6, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki podłogowe II [C2]"},  // WŁ: Virtual Button 6
-  {40, E00, -7, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł2 - wentylator [C11]"},  // WŁ: Virtual Button 7
+  {36, E(0,2), -3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - wschód [B6]"},  // WŁ: Virtual Button 3
+  {37, E(0,4), -4, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki schodowe [C6]"},  // WŁ: Virtual Button 4
+  {38, E(0,5), -5, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki podłogowe I [C4]"},  // WŁ: Virtual Button 5
+  {39, E(0,6), -6, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki podłogowe II [C2]"},  // WŁ: Virtual Button 6
+  {40, E(0,0), -7, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł2 - wentylator [C11]"},  // WŁ: Virtual Button 7
 };
 
 const int numberOfRelayButtons = sizeof(myRelayButtons) / sizeof(RelayButton);
@@ -128,7 +124,9 @@ void before() {
   
   #ifdef USE_EXPANDER
     /* Start I2C bus and PCF8574 instance */
-    expander0.begin(0x20);
+    for(int i = 0; i < numberOfExpanders; i++) {
+      expander[i].begin(expanderAddresses[i]);
+    }
   #endif
   
   // initialize multiple buttons list structure
@@ -159,9 +157,11 @@ void before() {
     if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
       // Then set relay pins in output mode
       #ifdef USE_EXPANDER
-        if ( myRelayButtons[i].relay & 0x0100 ) {
+        if ( myRelayButtons[i].relay & 0xff00 ) {
           // EXPANDER
-          expander0.pinMode(myRelayButtons[i].relay & 0xf, OUTPUT);
+          int expanderNo = (myRelayButtons[i].relay >> 8) - 1;
+          int expanderPin = myRelayButtons[i].relay & 0xff;
+          expander[expanderNo].pinMode(expanderPin, OUTPUT);
         } else {
       #endif
           pinMode(myRelayButtons[i].relay, OUTPUT);
@@ -359,8 +359,10 @@ void changeRelayState(int relayNum, uint8_t relayState) {
   uint8_t digitalOutState = relayState ? relayTrigger : ! relayTrigger;
   
   #ifdef USE_EXPANDER
-    if ( myRelayButtons[relayNum].relay & 0x0100 ) {
-      expander0.digitalWrite(myRelayButtons[relayNum].relay & 0xf, digitalOutState);
+    if ( myRelayButtons[relayNum].relay & 0xff00 ) {
+      int expanderNo = (myRelayButtons[relayNum].relay >> 8) - 1;
+      int expanderPin = myRelayButtons[relayNum].relay & 0xff;
+      expander[expanderNo].digitalWrite(expanderPin, digitalOutState);
     } else {
   #endif
     digitalWrite(myRelayButtons[relayNum].relay, digitalOutState);
