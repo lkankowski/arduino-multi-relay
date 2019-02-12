@@ -12,9 +12,7 @@
   uint8_t expanderAddresses[] = {0x20};
   const int numberOfExpanders = sizeof(expanderAddresses);
   PCF8574 expander[numberOfExpanders];
-  // Expander constants
   #define E(expanderNo, ExpanderPin) ((expanderNo+1)<<8 | (ExpanderPin))
-  //#define E00 0x0100
 #endif
 
 // No Button Constant
