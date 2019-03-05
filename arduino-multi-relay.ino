@@ -1,5 +1,5 @@
-// Enable debug prints to serial monitor
 #define USE_EXPANDER
+// Enable debug prints to serial monitor
 //#define MY_DEBUG
 
 #define MY_GATEWAY_SERIAL
@@ -8,11 +8,11 @@
 #include <Bounce2.h>
 #ifdef USE_EXPANDER
   #include <Wire.h>    // Required for I2C communication
-  #include "PCF8574.h" // Required for PCF8574
+  #include "PCF8574.h"
   uint8_t expanderAddresses[] = {0x20};
   const int numberOfExpanders = sizeof(expanderAddresses);
   PCF8574 expander[numberOfExpanders];
-  #define E(expanderNo, ExpanderPin) ((expanderNo+1)<<8 | (ExpanderPin))
+  #define E(expanderNo, ExpanderPin) (((expanderNo+1)<<8) | (ExpanderPin))
 #endif
 
 // No Button Constant
@@ -55,24 +55,24 @@ RelayButton myRelayButtons[] = {
   {3, E(0,1), A3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, BI_STABLE, "Halogen - Taras [B8]"},  // WŁ: Taras
   {4, 22, A4, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia [B2]"},  // WŁ: Kuchnia 1
   {5, 23, A5, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia - Kinkiet [B3]"},  // WŁ: Kuchnia 2
-  {6, 28, A6, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 2 [A4]"},  // WŁ: Hall I/Jadalnia 3
-  {7, 30, A7, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 1 [A6]"},  // WŁ: Hall I/Jadalnia 2
+  {6, 28, A6, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 2 [A4]"},  // WŁ: Hall I/Jadalnia prawy
+  {17, 17, A7, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Hall I/Ł1 prawy
   {8, 31, A8, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Kotłownia/Garaż
-  {-1, 31, A9, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Garaż
+  {8, 31, A9, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Garaż
   {10, 14, A10, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, BI_STABLE, "Halogen - wejście [B4]"},  // WŁ: Drzwi wejściowe
-  {11, E(0,7), A11, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, DING_DONG, "Dzwonek [?]"},  // WŁ: Dzwonek
-  {12, 29, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Jadalnia 1
-  {-1, 29, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Wiatrołap
+  {11, E(0,7), A11, RELAY_TRIGGER_LOW, DING_DONG, "Dzwonek [?]"},  // WŁ: Dzwonek
+  {12, 29, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Jadalnia lewy
+  {12, 29, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Wiatrołap
   {14, 32, A14, RELAY_TRIGGER_LOW, BI_STABLE, "Wiatrołap [A8]"},  // WŁ: Wiatrołap/Hall I
   {15, 19, A15, RELAY_TRIGGER_LOW, MONO_STABLE, "Kotłownia [B1]"},  // WŁ: Kotłownia/Hall I
-  {16, 24, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - LED"},  // WŁ: Hall I/Ł1 1
+  {16, 24, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Taśma LED [C1]"},  // WŁ: Hall I/Ł1 środek
   {17, 17, 52, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Ł1
-  {18, 18, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 [A12]"},  // WŁ: Hall I/Ł1 2
+  {18, 18, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 [A12]"},  // WŁ: Hall I/Ł1 lewy
   {19, 6, 50, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall I/Schody 1
-  {-1, 29, 49, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Schody 2
+  {12, 29, 49, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Schody 2
   {21, 26, 48, RELAY_TRIGGER_LOW, BI_STABLE, "Gabinet [A2]"},  // WŁ: Gabinet
   {22, 7, 47, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2 [B5]"},  // WŁ: Hall II/Schody 1
-  {-1, 6, 46, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall II/Schody 2
+  {19, 6, 46, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall II/Schody 2
   {24, 10, 45, RELAY_TRIGGER_LOW, BI_STABLE, "Garderoba [C12]"},  // WŁ: Garderoba
   {25, 4, 44, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad kuchnią 2 [B10]"},  // WŁ: Pok. nad kuchnią 2
   {26, 5, 43, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad kuchnią 1 [B9]"},  // WŁ: Pok. nad kuchnią 1
@@ -80,11 +80,11 @@ RelayButton myRelayButtons[] = {
   {28, 9, 41, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad salonem 1 [B11]"},  // WŁ: Pok. nad salonem 1
   {29, 3, 40, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 [C7]"},  // WŁ: Hall II/Ł2 1
   {30, E(0,3), 39, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 - Taśma LED [?]"},  // WŁ: Hall II/Ł2 2
-  {-1, 7, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2 [B5]"},  // WŁ: Hall II/Sypialnia
+  {22, 7, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2 [B5]"},  // WŁ: Hall II/Sypialnia
   {32, 11, 37, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 2 [C9]"},  // WŁ: Sypialnia 2
   {33, 12, 36, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 1 [C8]"},  // WŁ: Sypialnia 1
   {34, 25, -1, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, MONO_STABLE, "Halogen - Garaż [A1]"},  // WŁ: Virtual Button 1
-  {35, 27, -2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł1 - Wentylator [A3]"},  // WŁ: Virtual Button 2
+  {35, 30, -2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł1 - Wentylator [A3]"},  // WŁ: Virtual Button 2
   {36, E(0,2), -3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - wschód [B6]"},  // WŁ: Virtual Button 3
   {37, E(0,4), -4, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki schodowe [C6]"},  // WŁ: Virtual Button 4
   {38, E(0,5), -5, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki podłogowe I [C4]"},  // WŁ: Virtual Button 5
@@ -270,8 +270,8 @@ void loop() {
 void presentation() {
   // Send the sketch version information to the gateway and Controller
   sendSketchInfo("Multi Relay", "1.2");
-	
-	// Register every relay as separate sensor
+  
+  // Register every relay as separate sensor
   for (int i = 0; i < numberOfRelayButtons; i++) {
     // if this relay has multiple buttons, register only first
     if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
