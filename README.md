@@ -65,21 +65,18 @@ To use expander PCF8574 you have to uncomment this line:
 ```
 #define USE_EXPANDER
 ```
+Then configure all expanders id - i.e. only one expander with id = 0x20:
+```
+uint8_t expanderAddresses[] = {0x20};
+```
 From now you can use expander pins in configuration _myRelayButtons[]_. To recognize expander pin, numbers start from 0x0100 and have special meaning:
 * first byte - expander number (starts from 1)
 * second byte - pin number
 In example - "0x0100" means pin 0 on first expander
 
-To simplify using expanders, there are some constants _Eab_ where:
+To simplify using expanders, there is "E(a,b)" macro:
 * a - expander number (starts from 0)
 * b - pin on expander [0-f]
 ```
-#define E00 0x0100
+E(0,0) - first pin on first expander
 ```
-
-To add more expanders, at this moment you need following tasks:
-* add additional instances of expander -   PCF8574 expander1; PCF8574 expander1; ...
-* add more constants _Eab_
-* initialize all expanders - expander0.begin(0x20); expander1.begin(0x20); ...
-* change code in before() function - #ifdef USE_EXPANDER ... if ( myRelayButtons[i].relay & 0x0200 ) {... expander1.pinMode ...
-* change code in changeRelayState() function - #ifdef USE_EXPANDER ... if ( myRelayButtons[i].relay & 0x0200 ) {... expander1.digitalWrite( ...
