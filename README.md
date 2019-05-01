@@ -80,3 +80,5 @@ To simplify using expanders, there is "E(a,b)" macro:
 ```
 E(0,0) - first pin on first expander
 ```
+
+Basic information about expander and library you can find here - https://youtu.be/JNmVREucfyc (PL, library in description)
