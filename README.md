@@ -61,10 +61,11 @@ RelayButton myRelayButtons[] = {
 ```
 
 # Expander PCF8574 Support
-To use expander PCF8574 you have to uncomment this line:
+To use expander PCF8574 you have to install library (https://github.com/skywodd/pcf8574_arduino_library) and uncomment this line:
 ```
 #define USE_EXPANDER
 ```
+
 Then configure all expanders id - i.e. only one expander with id = 0x20:
 ```
 uint8_t expanderAddresses[] = {0x20};
