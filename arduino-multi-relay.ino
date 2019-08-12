@@ -1,4 +1,4 @@
-#define USE_EXPANDER
+//#define USE_EXPANDER
 // Enable debug prints to serial monitor
 //#define MY_DEBUG
 
@@ -49,47 +49,40 @@ typedef struct {
 //             button type - [MONO_STABLE|BI_STABLE|DING_DONG]
 //             relay description - reported on MySensor Gateway, can help identify device on initial configuration in Home Automation App, can be empty ("")
 RelayButton myRelayButtons[] = {
-  {0, 2, A0, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - kinkiet [C10]"},  // WŁ: Ł2
-  {1, 16, A1, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 2 [A9]"},  // WŁ: Salon 2
-  {2, 15, A2, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 1 [A10]"},  // WŁ: Salon 1
-  {3, E(0,1), A3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, BI_STABLE, "Halogen - Taras [B8]"},  // WŁ: Taras
-  {4, 22, A4, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia [B2]"},  // WŁ: Kuchnia 1
-  {5, 23, A5, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia - Kinkiet [B3]"},  // WŁ: Kuchnia 2
-  {6, 28, A6, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 2 [A4]"},  // WŁ: Hall I/Jadalnia prawy
-  {17, 17, A7, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Hall I/Ł1 prawy
-  {8, 31, A8, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Kotłownia/Garaż
-  {8, 31, A9, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż [A7]"},  // WŁ: Garaż
-  {10, 14, A10, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, BI_STABLE, "Halogen - wejście [B4]"},  // WŁ: Drzwi wejściowe
-  {11, E(0,7), A11, RELAY_TRIGGER_LOW, DING_DONG, "Dzwonek [?]"},  // WŁ: Dzwonek
-  {12, 29, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Jadalnia lewy
-  {12, 29, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Wiatrołap
-  {14, 32, A14, RELAY_TRIGGER_LOW, BI_STABLE, "Wiatrołap [A8]"},  // WŁ: Wiatrołap/Hall I
-  {15, 19, A15, RELAY_TRIGGER_LOW, MONO_STABLE, "Kotłownia [B1]"},  // WŁ: Kotłownia/Hall I
-  {16, 24, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Taśma LED [C1]"},  // WŁ: Hall I/Ł1 środek
-  {17, 17, 52, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł1 - Kinkiet [A11]"},  // WŁ: Ł1
-  {18, 18, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 [A12]"},  // WŁ: Hall I/Ł1 lewy
-  {19, 6, 50, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall I/Schody 1
-  {12, 29, 49, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1 [A5]"},  // WŁ: Hall I/Schody 2
-  {21, 26, 48, RELAY_TRIGGER_LOW, BI_STABLE, "Gabinet [A2]"},  // WŁ: Gabinet
-  {22, 7, 47, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2 [B5]"},  // WŁ: Hall II/Schody 1
-  {19, 6, 46, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa [B7]"},  // WŁ: Hall II/Schody 2
-  {24, 10, 45, RELAY_TRIGGER_LOW, BI_STABLE, "Garderoba [C12]"},  // WŁ: Garderoba
-  {25, 4, 44, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad kuchnią 2 [B10]"},  // WŁ: Pok. nad kuchnią 2
-  {26, 5, 43, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad kuchnią 1 [B9]"},  // WŁ: Pok. nad kuchnią 1
-  {27, 8, 42, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad salonem 2 [B12]"},  // WŁ: Pok. nad salonem 2
-  {28, 9, 41, RELAY_TRIGGER_LOW, MONO_STABLE, "Pok. nad salonem 1 [B11]"},  // WŁ: Pok. nad salonem 1
-  {29, 3, 40, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 [C7]"},  // WŁ: Hall II/Ł2 1
-  {30, E(0,3), 39, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 - Taśma LED [?]"},  // WŁ: Hall II/Ł2 2
-  {22, 7, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2 [B5]"},  // WŁ: Hall II/Sypialnia
-  {32, 11, 37, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 2 [C9]"},  // WŁ: Sypialnia 2
-  {33, 12, 36, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 1 [C8]"},  // WŁ: Sypialnia 1
-  {34, 25, -1, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, MONO_STABLE, "Halogen - Garaż [A1]"},  // WŁ: Virtual Button 1
-  {35, 30, -2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł1 - Wentylator [A3]"},  // WŁ: Virtual Button 2
-  {36, E(0,2), -3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - wschód [B6]"},  // WŁ: Virtual Button 3
-  {37, E(0,4), -4, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki schodowe [C6]"},  // WŁ: Virtual Button 4
-  {38, E(0,5), -5, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki podłogowe I [C4]"},  // WŁ: Virtual Button 5
-  {39, E(0,6), -6, RELAY_TRIGGER_LOW, MONO_STABLE, "Lampki podłogowe II [C2]"},  // WŁ: Virtual Button 6
-  {40, E(0,0), -7, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł2 - wentylator [C11]"},  // WŁ: Virtual Button 7
+  {0, 4, A0, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - kinkiet"},  // WŁ: Ł2
+  {1, 19, A1, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 2"},  // WŁ: Salon prawy
+  {2, 18, A2, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 1"},  // WŁ: Salon lewy
+  {3, 14, A3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, BI_STABLE, "Halogen - Taras"},  // WŁ: Taras
+  {4, 25, A4, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia"},  // WŁ: Kuchnia lewy
+  {5, 26, A5, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia - Kinkiet"},  // WŁ: Kuchnia prawy
+  {6, 31, A6, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 2"},  // WŁ: Hall I/Jadalnia prawy
+  {17, 22, A7, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Kinkiet"},  // WŁ: Hall I/Ł1 prawy
+  {8, 34, A8, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż"},  // WŁ: Kotłownia/Garaż
+  {8, 34, A9, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż"},  // WŁ: Garaż
+  {10, 3, A10, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, BI_STABLE, "Halogen - wejście"},  // WŁ: Drzwi wejściowe
+  {12, 32, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Jadalnia lewy
+  {12, 32, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Wiatrołap
+  {14, 35, A14, RELAY_TRIGGER_LOW, BI_STABLE, "Wiatrołap"},  // WŁ: Wiatrołap/Hall I
+  {15, 24, A15, RELAY_TRIGGER_LOW, MONO_STABLE, "Kotłownia"},  // WŁ: Kotłownia/Hall I
+  {16, 27, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Taśma LED"},  // WŁ: Hall I/Ł1 środek
+  {17, 22, 52, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł1 - Kinkiet"},  // WŁ: Ł1
+  {18, 23, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1"},  // WŁ: Hall I/Ł1 lewy
+  {19, 8, 50, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa"},  // WŁ: Hall I/Schody prawy
+  {12, 32, 49, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Schody lewy
+  {21, 29, 48, RELAY_TRIGGER_LOW, BI_STABLE, "Gabinet"},  // WŁ: Gabinet
+  {22, 9, 47, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2"},  // WŁ: Hall II/Schody prawy
+  {19, 8, 46, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa"},  // WŁ: Hall II/Schody lewy
+  {24, 11, 45, RELAY_TRIGGER_LOW, BI_STABLE, "Garderoba"},  // WŁ: Garderoba
+  {26, 7, 43, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad kuchnią 1"},  // WŁ: Pok. nad kuchnią 1
+  {27, 10, 42, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad salonem 2"},  // WŁ: Pok. nad salonem 2
+  {29, 5, 40, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2"},  // WŁ: Hall II/Ł2 lewy
+  {30, 6, 39, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 - Taśma LED"},  // WŁ: Hall II/Ł2 prawy
+  {22, 9, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2"},  // WŁ: Hall II/Sypialnia
+  {32, 12, 37, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 2"},  // WŁ: Sypialnia 2
+  {34, 28, -1, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, MONO_STABLE, "Halogen - Garaż"},  // WŁ: Virtual Button 1
+  {35, 30, -2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł1 - Wentylator"},  // WŁ: Virtual Button 2
+  {36, 15, -3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - wschód"},  // WŁ: Virtual Button 3
+  {40, 2, -7, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł2 - wentylator"},  // WŁ: Virtual Button 7
 };
 
 const int numberOfRelayButtons = sizeof(myRelayButtons) / sizeof(RelayButton);
@@ -295,15 +288,18 @@ void receive(const MyMessage &message) {
   // We only expect one type of message from controller. But we better check anyway.
   if (message.type == V_STATUS) {
     uint8_t isTurnedOn = message.getBool(); // 1 - true, 0 - false
-    changeRelayState(message.sensor, isTurnedOn);
+    int relayNum = getRelayNum(message.sensor);
+    if (relayNum == -1) return;
+    changeRelayState(relayNum, isTurnedOn);
+    // TODO: support for DING-DONG
     // Store state in eeprom if changed
-    if (loadRelayState(message.sensor) != isTurnedOn) {
-      saveRelayState(message.sensor, isTurnedOn);
+    if (loadRelayState(relayNum) != isTurnedOn) {
+      saveRelayState(relayNum, isTurnedOn);
     }
-    send(msgs[message.sensor].set(isTurnedOn)); // support for OPTIMISTIC=FALSE (Home Asistant)
+    send(msgs[relayNum].set(isTurnedOn)); // support for OPTIMISTIC=FALSE (Home Asistant)
     #ifdef MY_DEBUG
       // Write some debug info
-      Serial.print("# Incoming change for sensor: " + message.sensor);
+      Serial.print("# Incoming change for sensor: " + relayNum);
       Serial.println(", New status: " + isTurnedOn);
     #endif
   }
@@ -367,4 +363,11 @@ void changeRelayState(int relayNum, uint8_t relayState) {
   #ifdef USE_EXPANDER
     }
   #endif
+}
+
+int getRelayNum(int sensorId) {
+  for (int i = 0; i < numberOfRelayButtons; i++) {
+    if (myRelayButtons[i].sensorId == sensorId) return(i);
+  }
+  return(-1);
 }
