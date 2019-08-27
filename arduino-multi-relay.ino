@@ -1,4 +1,3 @@
-//#define USE_EXPANDER
 // Enable debug prints to serial monitor
 //#define MY_DEBUG
 
@@ -6,12 +5,19 @@
 
 #include <MySensors.h>
 #include <Bounce2.h>
-#ifdef USE_EXPANDER
+//#include "PCF8574.h"
+//#include "Adafruit_MCP23017.h"
+
+#if defined(PCF8574_H) || defined(_Adafruit_MCP23017_H_)
+  #define USE_EXPANDER
   #include <Wire.h>    // Required for I2C communication
-  #include "PCF8574.h"
   uint8_t expanderAddresses[] = {0x20};
   const int numberOfExpanders = sizeof(expanderAddresses);
-  PCF8574 expander[numberOfExpanders];
+  #if defined(PCF8574_H)
+    PCF8574 expander[numberOfExpanders];
+  #elif defined(_Adafruit_MCP23017_H_)
+    Adafruit_MCP23017 expander[numberOfExpanders];
+  #endif
   #define E(expanderNo, ExpanderPin) (((expanderNo+1)<<8) | (ExpanderPin))
 #endif
 

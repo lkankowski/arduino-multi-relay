@@ -60,15 +60,36 @@ RelayButton myRelayButtons[] = {
 };
 ```
 
-# Expander PCF8574 Support
-To use expander PCF8574 you have to install library (https://github.com/skywodd/pcf8574_arduino_library) and uncomment this line:
+# Expander
+Only one expander library at a time is supported.
+
+## PCF8574
+To use expander PCF8574 you have to install library (https://github.com/skywodd/pcf8574_arduino_library)
+Basic information about expander and library you can find here - https://youtu.be/JNmVREucfyc (PL, library in description)
+
+And uncomment expander library:
 ```
-#define USE_EXPANDER
+#include "PCF8574.h"
 ```
 
-Then configure all expanders id - i.e. only one expander with id = 0x20:
+## MCP23017
+https://github.com/adafruit/Adafruit-MCP23017-Arduino-Library
+
+Uncomment expander library:
+```
+#include "Adafruit_MCP23017.h"
+```
+
+## Configuration
+
+Configure all expanders id:
+I.e. only one PCF8574 expander with id = 0x20:
 ```
 uint8_t expanderAddresses[] = {0x20};
+```
+I.e. only one MCP23017 expander with id = 0:
+```
+uint8_t expanderAddresses[] = {0};
 ```
 From now you can use expander pins in configuration _myRelayButtons[]_. To recognize expander pin, numbers start from 0x0100 and have special meaning:
 * first byte - expander number (starts from 1)
@@ -82,4 +103,3 @@ To simplify using expanders, there is "E(a,b)" macro:
 E(0,0) - first pin on first expander
 ```
 
-Basic information about expander and library you can find here - https://youtu.be/JNmVREucfyc (PL, library in description)
