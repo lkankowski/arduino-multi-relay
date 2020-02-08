@@ -204,7 +204,7 @@ void setup() {
   for(int i = 0; i < numberOfRelayButtons; i++) {
     // if this relay has multiple buttons, send only first
     if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
-      msgs[i] = MyMessage(myRelayButtons[i].sensorId, V_LIGHT);
+      msgs[i] = MyMessage(myRelayButtons[i].sensorId, V_STATUS);
       uint8_t relayState;
       if (myRelayButtons[i].relayOptions & RELAY_STARTUP_ON) {
         relayState = 1;
