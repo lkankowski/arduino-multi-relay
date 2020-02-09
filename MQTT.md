@@ -1,4 +1,4 @@
-# Intro
+# Intro 1
 
 # Requirements / assumptions
 * Arduino board connected through UART (Serial/USB) - "/dev/ttyACM0"
