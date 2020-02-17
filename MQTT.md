@@ -42,6 +42,7 @@ and install required Node-Red modules:
   npm install node-red-node-serialport
   exit
 ```
+When installing outside docker, options "-g" and "--unsafe-perm" can be helpfull.
 
 Optionaly you can create image, so you can faster recreate container:
 ```
