@@ -47,49 +47,8 @@ typedef struct {
   const char * relayDescription;
 } RelayButton;
 
-// CONFIGURE ONLY THIS ARRAY!
-// Row params: sensor ID - sensor ID reported on MySensor Gateway
-//             relay pin - Expander supported
-//             button pin - <0 for virtual buttons (only available in MySensor Gateway); no support for Expander
-//             relay options - [RELAY_TRIGGER_LOW|RELAY_TRIGGER_HIGH] {RELAY_STARTUP_ON|RELAY_STARTUP_OFF}
-//             button type - [MONO_STABLE|BI_STABLE|DING_DONG]
-//             relay description - reported on MySensor Gateway, can help identify device on initial configuration in Home Automation App, can be empty ("")
-RelayButton myRelayButtons[] = {
-  {0, 4, A0, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - kinkiet"},  // WŁ: Ł2
-  {1, 19, A1, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 2"},  // WŁ: Salon prawy
-  {2, 18, A2, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 1"},  // WŁ: Salon lewy
-  {3, 14, A3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, BI_STABLE, "Halogen - Taras"},  // WŁ: Taras
-  {4, 25, A4, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia"},  // WŁ: Kuchnia lewy
-  {5, 26, A5, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia - Kinkiet"},  // WŁ: Kuchnia prawy
-  {6, 31, A6, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 2"},  // WŁ: Hall I/Jadalnia prawy
-  {17, 22, A7, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Kinkiet"},  // WŁ: Hall I/Ł1 prawy
-  {8, 34, A8, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż"},  // WŁ: Kotłownia/Garaż
-  {8, 34, A9, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż"},  // WŁ: Garaż
-  {10, 3, A10, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, BI_STABLE, "Halogen - wejście"},  // WŁ: Drzwi wejściowe
-  {12, 32, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Jadalnia lewy
-  {12, 32, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Wiatrołap
-  {14, 35, A14, RELAY_TRIGGER_LOW, BI_STABLE, "Wiatrołap"},  // WŁ: Wiatrołap/Hall I
-  {15, 24, A15, RELAY_TRIGGER_LOW, MONO_STABLE, "Kotłownia"},  // WŁ: Kotłownia/Hall I
-  {16, 27, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Taśma LED"},  // WŁ: Hall I/Ł1 środek
-  {17, 22, 52, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł1 - Kinkiet"},  // WŁ: Ł1
-  {18, 23, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1"},  // WŁ: Hall I/Ł1 lewy
-  {19, 8, 50, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa"},  // WŁ: Hall I/Schody prawy
-  {12, 32, 49, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Schody lewy
-  {21, 29, 48, RELAY_TRIGGER_LOW, BI_STABLE, "Gabinet"},  // WŁ: Gabinet
-  {22, 9, 47, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2"},  // WŁ: Hall II/Schody prawy
-  {19, 8, 46, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa"},  // WŁ: Hall II/Schody lewy
-  {24, 11, 45, RELAY_TRIGGER_LOW, BI_STABLE, "Garderoba"},  // WŁ: Garderoba
-  {26, 7, 43, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad kuchnią 1"},  // WŁ: Pok. nad kuchnią 1
-  {27, 10, 42, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad salonem 2"},  // WŁ: Pok. nad salonem 2
-  {29, 5, 40, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2"},  // WŁ: Hall II/Ł2 lewy
-  {30, 6, 39, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 - Taśma LED"},  // WŁ: Hall II/Ł2 prawy
-  {22, 9, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2"},  // WŁ: Hall II/Sypialnia
-  {32, 12, 37, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 2"},  // WŁ: Sypialnia 2
-  {34, 28, -1, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, MONO_STABLE, "Halogen - Garaż"},  // WŁ: Virtual Button 1
-  {35, 30, -2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł1 - Wentylator"},  // WŁ: Virtual Button 2
-  {36, 15, -3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - wschód"},  // WŁ: Virtual Button 3
-  {40, 2, -7, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł2 - wentylator"},  // WŁ: Virtual Button 7
-};
+// Configuration in separate file
+#include "config.h"
 
 const int numberOfRelayButtons = sizeof(myRelayButtons) / sizeof(RelayButton);
 
@@ -220,7 +179,7 @@ void setup() {
   for(int i = 0; i < numberOfRelayButtons; i++) {
     if (myRelayButtons[i].button >= 0) {
       // setup debouncer
-      myButtonDebouncer[i] = Bounce();
+      //myButtonDebouncer[i] = Bounce();
       myButtonDebouncer[i].attach(myRelayButtons[i].button);
       myButtonDebouncer[i].interval(50);
     }
@@ -248,9 +207,9 @@ void loop() {
           changeRelayState(relayNum, 0);
           send(msgs[relayNum].set(0));
         }
-      } else if (myRelayButtons[i].buttonType == BI_STABLE || buttonState == HIGH) {
+      } else if (myRelayButtons[i].buttonType == BI_STABLE || buttonState == MONO_STABLE_TRIGGER) {
         // If button type is BI_STABLE, any change will toggle relay state
-        // For MONO_STABLE, button must be pushed and released (HIGH)
+        // For MONO_STABLE, relay is triggered based on MONO_STABLE_TRIGGER
         uint8_t isTurnedOn = ! loadRelayState(relayNum); // 1 - true, 0 - false
         changeRelayState(relayNum, isTurnedOn);
         send(msgs[relayNum].set(isTurnedOn));

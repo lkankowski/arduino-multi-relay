@@ -2,12 +2,15 @@
 Arduino program to handle relays and control them using switches.
 Single pair of relay and switch are configured in single line.
 Buttons has debouncing and support for mono- and bi-stable switches.
-There is support for multiple switches for single relay.
+There is support for multiple switches for single relay and virtual switches for devices only accessible from Home App.
 
 I left configuration variable _myRelayButtons[]_ which is used at my house, so before use you HAVE TO change it.
 
 # Configuration
-## Main config
+## First time only
+Copy file "config.h.sample" into "config.h". On any future code update, you won't have to copy configuration to a newer version.
+
+## Main config file "config.h"
 ```
 RelayButton myRelayButtons[] = {
     {sensor ID, relay pin, button pin, relay options, button type, relay description}
@@ -29,6 +32,7 @@ Params description:
 In my case, I have a documentation of whole electricity of my house in Google Calc, and I have a formula to generate this configuration.
 
 # Debugging
+In a sketch file:
 ```
 #define MY_DEBUG
 ```
