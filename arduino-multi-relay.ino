@@ -25,17 +25,20 @@
 #define NOB -1
 #define MULTI_RELAY_VERSION 9
 #define RELAY_STATE_STORAGE 1
+#define RELAY_IMPULSE_INTERVAL 250
 
 const uint8_t RELAY_TRIGGER_LOW  = 0;
 const uint8_t RELAY_TRIGGER_HIGH = 1;
 const uint8_t RELAY_STARTUP_ON   = 2;
 const uint8_t RELAY_STARTUP_OFF  = 4;
+const uint8_t RELAY_IMPULSE      = 8;
 const uint8_t RELAY_STARTUP_MASK = RELAY_STARTUP_ON | RELAY_STARTUP_OFF;
 
 enum ButtonType {
   MONO_STABLE = 0,
   BI_STABLE = 1,
-  DING_DONG = 2 // HIGH state immediatly after push, LOW state after release
+  DING_DONG = 2, // HIGH state immediatly after push, LOW state after release
+  REED_SWITCH = 3 // magnetic sensor for door or window, LOW - closed, HIGH - opened
 };
 
 typedef struct {
@@ -58,7 +61,9 @@ typedef struct {
 } RelayMultiButtons;
 
 RelayMultiButtons relayMultiButtons[numberOfRelayButtons];
-uint8_t myRelayState[numberOfRelayButtons];
+uint8_t myRelayState[numberOfRelayButtons]; // 0 - OFF, 1 - ON
+unsigned long myRelayImpulseStart[numberOfRelayButtons];
+int impulsePending = 0;
 
 // MySensors - Sending Data
 // To send data you have to create a MyMessage container to hold the information.
@@ -147,7 +152,7 @@ void before() {
     // version has changed, so store new version in eeporom
     saveState(0, MULTI_RELAY_VERSION);
   }
-}
+} // before()
 
 // executed AFTER mysensors has been initialised
 void setup() {
@@ -173,6 +178,7 @@ void setup() {
         relayState = loadRelayState(i);
       }
       send(msgs[i].set(relayState)); // send current state
+      myRelayImpulseStart[i] = 0;
     }
   }
   // Setup buttons
@@ -207,6 +213,14 @@ void loop() {
           changeRelayState(relayNum, 0);
           send(msgs[relayNum].set(0));
         }
+      } else if (myRelayButtons[i].buttonType == REED_SWITCH) {
+        if (buttonState == LOW) { // door/window closed
+          changeRelayState(relayNum, 0);
+          send(msgs[relayNum].set(0));
+        } else { // door/window opened
+          changeRelayState(relayNum, 1);
+          send(msgs[relayNum].set(1));
+        }
       } else if (myRelayButtons[i].buttonType == BI_STABLE || buttonState == MONO_STABLE_TRIGGER) {
         // If button type is BI_STABLE, any change will toggle relay state
         // For MONO_STABLE, relay is triggered based on MONO_STABLE_TRIGGER
@@ -214,8 +228,33 @@ void loop() {
         changeRelayState(relayNum, isTurnedOn);
         send(msgs[relayNum].set(isTurnedOn));
         saveRelayState(relayNum, isTurnedOn);
+        if ((myRelayButtons[relayNum].relayOptions & RELAY_IMPULSE) && isTurnedOn) {
+          myRelayImpulseStart[relayNum] = millis();
+          impulsePending++;
+        }
       }
     }
+  }
+  
+  if (impulsePending) {
+    unsigned long currentMillis = millis();
+    for(int i = 0; i < numberOfRelayButtons; i++) {
+      // Ignore multi-buttons
+      if (relayMultiButtons[i].firstButton == -1 || relayMultiButtons[i].firstButton == i) {
+        if ((myRelayButtons[i].relayOptions & RELAY_IMPULSE) && (myRelayImpulseStart[i] > 0)) {
+          // the "|| (currentMillis < myRelayImpulseStart[i])" is for "millis()" overflow protection
+          if ((currentMillis > myRelayImpulseStart[i]+RELAY_IMPULSE_INTERVAL) || (currentMillis < myRelayImpulseStart[i])) {
+            if (myRelayState[i] == 1) {
+              changeRelayState(i, 0);
+            }
+            send(msgs[i].set(0)); // send current state
+            myRelayImpulseStart[i] = 0;
+            impulsePending--;
+          }
+        }
+      }
+    }
+    if (impulsePending<0) impulsePending = 0;
   }
 }
 
@@ -256,7 +295,10 @@ void receive(const MyMessage &message) {
     int relayNum = getRelayNum(message.sensor);
     if (relayNum == -1) return;
     changeRelayState(relayNum, isTurnedOn);
-    // TODO: support for DING-DONG
+    if ((myRelayButtons[relayNum].relayOptions & RELAY_IMPULSE) && isTurnedOn) {
+      myRelayImpulseStart[relayNum] = millis();
+      impulsePending++;
+    }
     // Store state in eeprom if changed
     if (loadRelayState(relayNum) != isTurnedOn) {
       saveRelayState(relayNum, isTurnedOn);
