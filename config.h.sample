@@ -1,12 +1,15 @@
 // For mono-stable buttons it will trigger state: LOW - when button is pressed, HIGH - when button is released
 const uint8_t MONO_STABLE_TRIGGER = LOW;
 
+// time interval for RELAY_IMPULSE type relay, ignored when button type is DING_DONG or REED_SWITCH
+unsigned long RELAY_IMPULSE_INTERVAL = 250;
+
 
 // Row params: sensor ID - sensor ID reported on MySensor Gateway
 //             relay pin - Expander supported
 //             button pin - <0 for virtual buttons (only available in MySensor Gateway); no support for Expander
-//             relay options - [RELAY_TRIGGER_LOW|RELAY_TRIGGER_HIGH] {RELAY_STARTUP_ON|RELAY_STARTUP_OFF}
-//             button type - [MONO_STABLE|BI_STABLE|DING_DONG]
+//             relay options - [RELAY_TRIGGER_LOW|RELAY_TRIGGER_HIGH] {RELAY_STARTUP_ON|RELAY_STARTUP_OFF} {RELAY_IMPULSE}
+//             button type - [MONO_STABLE|BI_STABLE|DING_DONG|REED_SWITCH]
 //             relay description - reported on MySensor Gateway, can help identify device on initial configuration in Home Automation App, can be empty ("")
 RelayButton myRelayButtons[] = {
   {0, 4, A0, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - kinkiet"},  // WŁ: Ł2

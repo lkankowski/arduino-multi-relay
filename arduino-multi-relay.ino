@@ -25,7 +25,6 @@
 #define NOB -1
 #define MULTI_RELAY_VERSION 9
 #define RELAY_STATE_STORAGE 1
-#define RELAY_IMPULSE_INTERVAL 250
 
 const uint8_t RELAY_TRIGGER_LOW  = 0;
 const uint8_t RELAY_TRIGGER_HIGH = 1;
