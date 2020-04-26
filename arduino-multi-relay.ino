@@ -264,7 +264,7 @@ void loop() {
 // Executed after "before()" and before "setup()" in: _begin (MySensorsCore.cpp) > gatewayTransportInit() > presentNode()
 void presentation() {
   // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Multi Relay", "1.2");
+  sendSketchInfo("Multi Relay", "1.3");
   
   // Register every relay as separate sensor
   for (int i = 0; i < numberOfRelayButtons; i++) {
