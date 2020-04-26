@@ -146,6 +146,7 @@ void before() {
       changeRelayState(i, isTurnedOn);
       myRelayState[i] = isTurnedOn;
     }
+    myRelayImpulseStart[i] = 0;
   }
   if (versionChangeResetState) {
     // version has changed, so store new version in eeporom
@@ -161,8 +162,6 @@ void setup() {
       pinMode(myRelayButtons[i].button, INPUT_PULLUP); // HIGH state when button is not pushed
     }
   }
-  // Setup locally attached sensors
-  delay(5000);
   // Send state to MySensor Gateway
   for(int i = 0; i < numberOfRelayButtons; i++) {
     // if this relay has multiple buttons, send only first
@@ -177,7 +176,6 @@ void setup() {
         relayState = loadRelayState(i);
       }
       send(msgs[i].set(relayState)); // send current state
-      myRelayImpulseStart[i] = 0;
     }
   }
   // Setup buttons
@@ -245,6 +243,7 @@ void loop() {
           if ((currentMillis > myRelayImpulseStart[i]+RELAY_IMPULSE_INTERVAL) || (currentMillis < myRelayImpulseStart[i])) {
             if (myRelayState[i] == 1) {
               changeRelayState(i, 0);
+              saveRelayState(i, 0);
             }
             send(msgs[i].set(0)); // send current state
             myRelayImpulseStart[i] = 0;
@@ -253,7 +252,7 @@ void loop() {
         }
       }
     }
-    if (impulsePending<0) impulsePending = 0;
+    if (impulsePending < 0) impulsePending = 0;
   }
 }
 
