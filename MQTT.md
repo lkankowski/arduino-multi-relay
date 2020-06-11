@@ -38,8 +38,8 @@ docker exec -it nodered /bin/bash
 ```
 and install required Node-Red modules:
 ```
-  npm install node-red-contrib-mysensors
-  npm install node-red-node-serialport
+  npm install --no-optional node-red-contrib-mysensors
+  npm install --no-optional node-red-node-serialport
   exit
 ```
 When installing outside docker, options "-g" and "--unsafe-perm" can be helpfull.
