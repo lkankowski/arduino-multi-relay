@@ -4,46 +4,87 @@ const uint8_t MONO_STABLE_TRIGGER = LOW;
 // time interval for RELAY_IMPULSE type relay, ignored when button type is DING_DONG or REED_SWITCH
 unsigned long RELAY_IMPULSE_INTERVAL = 250;
 
+// debounce interval in milliseconds
+unsigned long BUTTON_DEBOUNCE_INTERVAL = 50;
 
-// Row params: sensor ID - sensor ID reported on MySensor Gateway
+// double-click interval in milliseconds
+unsigned long BUTTON_DOUBLE_CLICK_INTERVAL = 600;
+
+// long-press interval in milliseconds
+unsigned long BUTTON_LONG_PRESS_INTERVAL = 1000;
+
+// Relays config - ID and PIN MUST BE UNIQUE (can't be repeated)!
+// Row params: relay ID - [0-254] sensor ID reported on MySensor Gateway
 //             relay pin - Expander supported
-//             button pin - <0 for virtual buttons (only available in MySensor Gateway); no support for Expander
 //             relay options - [RELAY_TRIGGER_LOW|RELAY_TRIGGER_HIGH] {RELAY_STARTUP_ON|RELAY_STARTUP_OFF} {RELAY_IMPULSE}
-//             button type - [MONO_STABLE|BI_STABLE|DING_DONG|REED_SWITCH]
 //             relay description - reported on MySensor Gateway, can help identify device on initial configuration in Home Automation App, can be empty ("")
-RelayButton myRelayButtons[] = {
-  {0, 4, A0, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł2 - kinkiet"},  // WŁ: Ł2
-  {1, 19, A1, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 2"},  // WŁ: Salon prawy
-  {2, 18, A2, RELAY_TRIGGER_LOW, BI_STABLE, "Salon 1"},  // WŁ: Salon lewy
-  {3, 14, A3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, BI_STABLE, "Halogen - Taras"},  // WŁ: Taras
-  {4, 25, A4, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia"},  // WŁ: Kuchnia lewy
-  {5, 26, A5, RELAY_TRIGGER_LOW, BI_STABLE, "Kuchnia - Kinkiet"},  // WŁ: Kuchnia prawy
-  {6, 31, A6, RELAY_TRIGGER_LOW, BI_STABLE, "Jadalnia 2"},  // WŁ: Hall I/Jadalnia prawy
-  {17, 22, A7, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Kinkiet"},  // WŁ: Hall I/Ł1 prawy
-  {8, 34, A8, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż"},  // WŁ: Kotłownia/Garaż
-  {8, 34, A9, RELAY_TRIGGER_LOW, MONO_STABLE, "Garaż"},  // WŁ: Garaż
-  {10, 3, A10, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, BI_STABLE, "Halogen - wejście"},  // WŁ: Drzwi wejściowe
-  {12, 32, A12, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Jadalnia lewy
-  {12, 32, A13, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Wiatrołap
-  {14, 35, A14, RELAY_TRIGGER_LOW, BI_STABLE, "Wiatrołap"},  // WŁ: Wiatrołap/Hall I
-  {15, 24, A15, RELAY_TRIGGER_LOW, MONO_STABLE, "Kotłownia"},  // WŁ: Kotłownia/Hall I
-  {16, 27, 53, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1 - Taśma LED"},  // WŁ: Hall I/Ł1 środek
-  {17, 22, 52, RELAY_TRIGGER_LOW, MONO_STABLE, "Ł1 - Kinkiet"},  // WŁ: Ł1
-  {18, 23, 51, RELAY_TRIGGER_LOW, BI_STABLE, "Ł1"},  // WŁ: Hall I/Ł1 lewy
-  {19, 8, 50, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa"},  // WŁ: Hall I/Schody prawy
-  {12, 32, 49, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 1"},  // WŁ: Hall I/Schody lewy
-  {21, 29, 48, RELAY_TRIGGER_LOW, BI_STABLE, "Gabinet"},  // WŁ: Gabinet
-  {22, 9, 47, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2"},  // WŁ: Hall II/Schody prawy
-  {19, 8, 46, RELAY_TRIGGER_LOW, BI_STABLE, "Klatka Schodowa"},  // WŁ: Hall II/Schody lewy
-  {24, 11, 45, RELAY_TRIGGER_LOW, BI_STABLE, "Garderoba"},  // WŁ: Garderoba
-  {26, 7, 43, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad kuchnią 1"},  // WŁ: Pok. nad kuchnią 1
-  {27, 10, 42, RELAY_TRIGGER_LOW, BI_STABLE, "Pok. nad salonem 2"},  // WŁ: Pok. nad salonem 2
-  {29, 5, 40, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2"},  // WŁ: Hall II/Ł2 lewy
-  {30, 6, 39, RELAY_TRIGGER_LOW, BI_STABLE, "Ł2 - Taśma LED"},  // WŁ: Hall II/Ł2 prawy
-  {22, 9, 38, RELAY_TRIGGER_LOW, BI_STABLE, "Hall 2"},  // WŁ: Hall II/Sypialnia
-  {32, 12, 37, RELAY_TRIGGER_LOW, BI_STABLE, "Sypialnia 2"},  // WŁ: Sypialnia 2
-  {34, 28, -1, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, MONO_STABLE, "Halogen - Garaż"},  // WŁ: Virtual Button 1
-  {35, 30, -2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł1 - Wentylator"},  // WŁ: Virtual Button 2
-  {36, 15, -3, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Halogen - wschód"},  // WŁ: Virtual Button 3
-  {40, 2, -7, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, MONO_STABLE, "Ł2 - wentylator"},  // WŁ: Virtual Button 7
+RelayDef myRelays[] = {
+  {0, 4, RELAY_TRIGGER_LOW, "Ł2 - kinkiet"},
+  {1, 19, RELAY_TRIGGER_LOW, "Salon 2"},
+  {2, 18, RELAY_TRIGGER_LOW, "Salon 1"},
+  {3, 14, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "Halogen - Taras"},
+  {4, 25, RELAY_TRIGGER_LOW, "Kuchnia"},
+  {5, 26, RELAY_TRIGGER_LOW, "Kuchnia - Kinkiet"},
+  {6, 31, RELAY_TRIGGER_LOW, "Jadalnia 2"},
+  {8, 34, RELAY_TRIGGER_LOW, "Garaż"},
+  {10, 3, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, "Halogen - wejście"},
+  {12, 32, RELAY_TRIGGER_LOW, "Hall 1"},
+  {14, 35, RELAY_TRIGGER_LOW, "Wiatrołap"},
+  {15, 24, RELAY_TRIGGER_LOW, "Kotłownia"},
+  {16, 27, RELAY_TRIGGER_LOW, "Ł1 - Taśma LED"},
+  {17, 22, RELAY_TRIGGER_LOW, "Ł1 - Kinkiet"},
+  {18, 23, RELAY_TRIGGER_LOW, "Ł1"},
+  {19, 8, RELAY_TRIGGER_LOW, "Klatka Schodowa"},
+  {21, 29, RELAY_TRIGGER_LOW, "Gabinet"},
+  {22, 9, RELAY_TRIGGER_LOW, "Hall 2"},
+  {24, 11, RELAY_TRIGGER_LOW, "Garderoba"},
+  {26, 7, RELAY_TRIGGER_LOW, "Pok. nad kuchnią 1"},
+  {27, 10, RELAY_TRIGGER_LOW, "Pok. nad salonem 2"},
+  {29, 5, RELAY_TRIGGER_LOW, "Ł2"},
+  {30, 6, RELAY_TRIGGER_LOW, "Ł2 - Taśma LED"},
+  {32, 12, RELAY_TRIGGER_LOW, "Sypialnia 2"},
+  {34, 28, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, "Halogen - Garaż"},
+  {35, 30, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "Ł1 - Wentylator"},
+  {36, 15, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "Halogen - wschód"},
+  {40, 2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "Ł2 - wentylator"}
 };
+
+// Row params: button pin - no support for Expander
+//             button type - [MONO_STABLE|BI_STABLE|DING_DONG|REED_SWITCH]
+//             click action relay ID - MUST be defined in myRelays
+//             long-press action relay ID (excluding BI_STABLE) - MUST be defined in myRelays
+//             double-click action relay ID - MUST be defined in myRelays
+//             button description - debug only, can be empty ("")
+ButtonDef myButtons[] = {
+  {A0,  MONO_STABLE, 0,  -1, -1, "Ł2"},
+  {A1,  BI_STABLE,   1,  -1, -1, "Salon prawy"},
+  {A2,  BI_STABLE,   2,  -1, -1, "Salon lewy"},
+  {A3,  BI_STABLE,   3,  -1, -1, "Taras"},
+  {A4,  BI_STABLE,   4,  -1, -1, "Kuchnia lewy"},
+  {A5,  BI_STABLE,   5,  -1, -1, "Kuchnia prawy"},
+  {A6,  BI_STABLE,   6,  -1, -1, "Hall I/Jadalnia prawy"},
+  {A7,  BI_STABLE,   17, -1, -1, "Hall I/Ł1 prawy"},
+  {A8,  MONO_STABLE, 8,  -1, -1, "Kotłownia/Garaż"},
+  {A9,  MONO_STABLE, 8,  -1, -1, "Garaż"},
+  {A10, BI_STABLE,   10, -1, -1, "Drzwi wejściowe"},
+  {A12, BI_STABLE,   12, -1, -1, "Hall I/Jadalnia lewy"},
+  {A13, BI_STABLE,   12, -1, -1, "Hall I/Wiatrołap"},
+  {A14, BI_STABLE,   14, -1, -1, "Wiatrołap/Hall I"},
+  {A15, MONO_STABLE, 15, 12, -1, "Kotłownia/Hall I"},
+  {53,  BI_STABLE,   16, -1, -1, "Hall I/Ł1 środek"},
+  {52,  MONO_STABLE, 17, -1, -1, "Ł1"},
+  {51,  BI_STABLE,   18, -1, -1, "Hall I/Ł1 lewy"},
+  {50,  BI_STABLE,   19, -1, -1, "Hall I/Schody prawy"},
+  {49,  BI_STABLE,   12, -1, -1, "Hall I/Schody lewy"},
+  {48,  BI_STABLE,   21, -1, 12, "Gabinet"},
+  {47,  BI_STABLE,   22, -1, -1, "Hall II/Schody prawy"},
+  {46,  BI_STABLE,   19, -1, -1, "Hall II/Schody lewy"},
+  {45,  BI_STABLE,   24, -1, -1, "Garderoba"},
+  {43,  BI_STABLE,   26, -1, -1, "Pok. nad kuchnią 1"},
+  {42,  BI_STABLE,   27, -1, -1, "Pok. nad salonem 2"},
+  {40,  BI_STABLE,   29, -1, -1, "Hall II/Ł2 lewy"},
+  {39,  BI_STABLE,   30, -1, -1, "Hall II/Ł2 prawy"},
+  {38,  BI_STABLE,   22, -1, -1, "Hall II/Sypialnia"},
+  {37,  BI_STABLE,   32, -1, -1, "Sypialnia 2"}
+};
+//decisions: multiple relays for one button?
