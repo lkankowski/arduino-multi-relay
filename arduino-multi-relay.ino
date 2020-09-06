@@ -1,6 +1,9 @@
+// comment in Arduino IDE
 #include <Arduino.h>
+
 // Enable debug prints to serial monitor
-//#define MY_DEBUG
+#define MY_DEBUG
+//#define DEBUG_STATS 1000
 
 #define MY_GATEWAY_SERIAL
 
@@ -54,6 +57,7 @@ enum ButtonEvent {
   BUTTON_DOUBLE_CLICK = 0x02,
   BUTTON_LONG_PRESS = 0x04,
   BUTTON_PRESSED = 0x10,
+  BUTTON_CHANGED = 0x20,
   BUTTON_ACTION_MASK = 0x0f
 };
 
@@ -92,6 +96,13 @@ ButtonToRelayIndexDef buttonToRelayIndex[numberOfButtons];
 uint8_t myRelayState[numberOfRelays]; // 0 - OFF, 1 - ON
 unsigned long myRelayImpulseStart[numberOfRelays];
 int impulsePending = 0;
+
+#ifdef DEBUG_STATS
+  bool debugStatsOn = false;
+  int loopCounter = 0;
+  unsigned long loopInterval = 0;
+  unsigned long loopCumulativeMillis = 0;
+#endif
 
 // MySensors - Sending Data
 // To send data you have to create a MyMessage container to hold the information.
@@ -187,30 +198,60 @@ void setup() {
       myPhysicalButton[i].interval(BUTTON_DEBOUNCE_INTERVAL);
 
       // make button to relay index
-      
       buttonToRelayIndex[i].clickRelayNum = myButtons[i].clickRelayId > 0 ? getRelayNum(myButtons[i].clickRelayId) : -1;
       buttonToRelayIndex[i].longClickRelayNum = myButtons[i].longClickRelayId > 0 ? getRelayNum(myButtons[i].longClickRelayId) : -1;
       buttonToRelayIndex[i].doubleClickRelayNum = myButtons[i].doubleClickRelayId > 0 ? getRelayNum(myButtons[i].doubleClickRelayId) : -1;
-      buttonToRelayIndex[i].buttonState = 0;
+      //TODO: initial state needed for REED_SWITCH and DING_DONG
+      if ((myButtons[i].buttonType == DING_DONG) || (myButtons[i].buttonType == REED_SWITCH)) {
+        myPhysicalButton[i].update();
+        int buttonPinState = myPhysicalButton[i].read();
+        int activeLevel = buttonPinState == (myButtons[i].buttonType == REED_SWITCH ? HIGH : LOW);
+        if (activeLevel) {
+          buttonToRelayIndex[i].buttonState = BTN_STATE_1ST_PRESS;
+        } else {
+          buttonToRelayIndex[i].buttonState = BTN_STATE_INITIAL;
+        }
+      } else {
+        buttonToRelayIndex[i].buttonState = BTN_STATE_INITIAL;
+      }
       buttonToRelayIndex[i].startStateMillis = 0;
   }
 }
 
 void loop() {
+  #ifdef DEBUG_STATS
+    unsigned long loopStartMillis = millis();
+  #endif
+
   for(int i = 0; i < numberOfButtons; i++) {
     int buttonAction = getButtonAction(i);
     int relayNum;
 
     if ((myButtons[i].buttonType == DING_DONG) || (myButtons[i].buttonType == REED_SWITCH)) {
       relayNum = buttonToRelayIndex[i].clickRelayNum;
+      #ifdef MY_DEBUG
+        if (buttonAction & BUTTON_CHANGED) {
+          Serial.print("# relay: ");
+          Serial.print(relayNum);
+          Serial.print(", myRelayState: ");
+          Serial.print(myRelayState[relayNum]);
+          Serial.print(", buttonAction: ");
+          Serial.println(buttonAction);
+        }
+      #endif
       myMessage.setSensor(myRelays[relayNum].sensorId);
-      if (((buttonAction & BUTTON_PRESSED) > 0) && (loadRelayState(relayNum) == 0)) { // button pressed or door/window opened
+      if ((buttonAction & BUTTON_CHANGED) && ((buttonAction & BUTTON_PRESSED) > 0) && (myRelayState[relayNum] == 0)) { // button pressed or door/window opened
           changeRelayState(relayNum, 1);
-          send(myMessage.set(1));
-      } else if (((buttonAction & BUTTON_PRESSED) == 0) && (loadRelayState(relayNum) == 1)) { // button released or door/window closed
+          saveRelayState(relayNum, 1, false);
+          Serial.println("# ON");
+          //send(myMessage.set(1));
+      } else if ((buttonAction & BUTTON_CHANGED) && ((buttonAction & BUTTON_PRESSED) == 0) && (myRelayState[relayNum] == 1)) { // button released or door/window closed
           changeRelayState(relayNum, 0);
-          send(myMessage.set(0));
+          saveRelayState(relayNum, 0, false);
+          Serial.println("# OFF");
+          //send(myMessage.set(0));
       }
+      continue;
     }
     if (buttonAction & BUTTON_CLICK) {
       relayNum = buttonToRelayIndex[i].clickRelayNum;
@@ -221,6 +262,12 @@ void loop() {
     } else {
       continue;
     }
+    #ifdef MY_DEBUG
+      if (relayNum == -1) {
+        Serial.print("# button action (-1): " + i);
+        Serial.println(", buttonAction: " + buttonAction);
+      }
+    #endif
     myMessage.setSensor(myRelays[relayNum].sensorId);
 
     if (buttonAction & BUTTON_ACTION_MASK) {
@@ -255,6 +302,24 @@ void loop() {
     }
     if (impulsePending < 0) impulsePending = 0;
   }
+
+  #ifdef DEBUG_STATS
+    if (debugStatsOn) {
+      loopCumulativeMillis += millis() - loopStartMillis;
+      loopCounter++;
+      if ( loopCounter > DEBUG_STATS) {
+        unsigned long loopIntervalCurrent = millis();
+        Serial.print("# loop stats: 1000 loops=");
+        Serial.print(loopIntervalCurrent - loopInterval);
+        Serial.print("ms, cumulative_loop_millis=");
+        Serial.print(loopCumulativeMillis);
+        Serial.println("ms");
+        loopInterval = loopIntervalCurrent;
+        loopCumulativeMillis = 0;
+        loopCounter = 0;
+      }
+    }
+  #endif
 }
 
 
@@ -265,7 +330,7 @@ void loop() {
 // Executed after "before()" and before "setup()" in: _begin (MySensorsCore.cpp) > gatewayTransportInit() > presentNode()
 void presentation() {
   // Send the sketch version information to the gateway and Controller
-  sendSketchInfo("Multi Relay", "1.3");
+  sendSketchInfo("Multi Relay", "1.4");
   
   // Register every relay as separate sensor
   for (int i = 0; i < numberOfRelays; i++) {
@@ -306,6 +371,12 @@ void receive(const MyMessage &message) {
       Serial.print("# Incoming change for sensor: " + relayNum);
       Serial.println(", New status: " + isTurnedOn);
     #endif
+  #ifdef DEBUG_STATS
+  } else if (message.type == V_VAR1) {
+      debugStatsOn = message.getBool();
+      Serial.print("# Debug is: ");
+      Serial.println(debugStatsOn);
+  #endif
   }
 }
 
@@ -327,6 +398,7 @@ uint8_t loadRelayState(int relayNum, uint8_t forceEeprom) {
     Serial.print(" = ");
     Serial.println(relayState);
   #endif
+  if (relayState > 1) relayState = 0;
   return(relayState);
 }
 
@@ -380,10 +452,10 @@ int getButtonAction(int buttonNum) {
 
 
   #ifdef MY_DEBUG
-    Serial.print("# Button ");
-    Serial.print(i);
-    Serial.print(" changed to: ");
-    Serial.println(buttonPinState);
+    // Serial.print("# Button ");
+    // Serial.print(buttonNum);
+    // Serial.print(" changed to: ");
+    // Serial.println(buttonPinState);
   #endif
 
   unsigned long now = millis();
@@ -402,7 +474,7 @@ int getButtonAction(int buttonNum) {
   // BI_STABLE buttons only state
   } else if (buttonToRelayIndex[buttonNum].buttonState == BTN_STATE_1ST_CHANGE_BI) { // waiting for next change
     // waiting for second change or timeout
-    if ((now - buttonToRelayIndex[buttonNum].startStateMillis) > BUTTON_DOUBLE_CLICK_INTERVAL) {
+    if (!hasDoubleClick || ((now - buttonToRelayIndex[buttonNum].startStateMillis) > BUTTON_DOUBLE_CLICK_INTERVAL)) {
       // this was only a single short click
       result = BUTTON_CLICK;
       buttonToRelayIndex[buttonNum].buttonState = BTN_STATE_INITIAL;
@@ -426,7 +498,7 @@ int getButtonAction(int buttonNum) {
       if ((!hasDoubleClick) && (!hasLongClick) && (buttonPinState == MONO_STABLE_TRIGGER)) { // no long/double-click action, do click (old behavior)
         result = BUTTON_CLICK | BUTTON_PRESSED;
         buttonToRelayIndex[buttonNum].buttonState = BTN_STATE_RELEASE_WAIT;
-      } else if ((now - buttonToRelayIndex[buttonNum].startStateMillis) > BUTTON_LONG_PRESS_INTERVAL) {
+      } else if (hasLongClick && ((now - buttonToRelayIndex[buttonNum].startStateMillis) > BUTTON_LONG_PRESS_INTERVAL)) {
         result = BUTTON_LONG_PRESS | BUTTON_PRESSED;
         buttonToRelayIndex[buttonNum].buttonState = BTN_STATE_RELEASE_WAIT;
       } else {
@@ -464,5 +536,8 @@ int getButtonAction(int buttonNum) {
     }
   }
 
+  if (isPinChanged) {
+    result |= BUTTON_CHANGED;
+  }
   return result;
 };

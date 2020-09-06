@@ -1,3 +1,11 @@
+// for development purposes copy "config.h.sample" into "config.h" file or use link:
+// - Windows 10 (PowerShell) as admin: Start-Process -FilePath "$env:comspec" -ArgumentList "/k", "mklink", "config.h","config.h.sample"
+// For production you can customize "config.h" or use link to "config.h.local":
+// Start-Process -FilePath "$env:comspec" -ArgumentList "/k", "mklink", "config.h","config.h.local"
+// Alternative version:
+// Start-Process -Verb RunAs -FilePath "powershell" -ArgumentList "-NoExit","-command","New-Item -Path '$(Get-Location)\config.h' -ItemType SymbolicLink -Value '$(Get-Location)\config.h.pkuchciak'"
+
+
 // For mono-stable buttons it will trigger state: LOW - when button is pressed, HIGH - when button is released
 const uint8_t MONO_STABLE_TRIGGER = LOW;
 
@@ -8,10 +16,10 @@ unsigned long RELAY_IMPULSE_INTERVAL = 250;
 unsigned long BUTTON_DEBOUNCE_INTERVAL = 50;
 
 // double-click interval in milliseconds
-unsigned long BUTTON_DOUBLE_CLICK_INTERVAL = 600;
+unsigned long BUTTON_DOUBLE_CLICK_INTERVAL = 350;
 
 // long-press interval in milliseconds
-unsigned long BUTTON_LONG_PRESS_INTERVAL = 1000;
+unsigned long BUTTON_LONG_PRESS_INTERVAL = 800;
 
 // Relays config - ID and PIN MUST BE UNIQUE (can't be repeated)!
 // Row params: relay ID - [0-254] sensor ID reported on MySensor Gateway
@@ -19,72 +27,26 @@ unsigned long BUTTON_LONG_PRESS_INTERVAL = 1000;
 //             relay options - [RELAY_TRIGGER_LOW|RELAY_TRIGGER_HIGH] {RELAY_STARTUP_ON|RELAY_STARTUP_OFF} {RELAY_IMPULSE}
 //             relay description - reported on MySensor Gateway, can help identify device on initial configuration in Home Automation App, can be empty ("")
 RelayDef myRelays[] = {
-  {0, 4, RELAY_TRIGGER_LOW, "Ł2 - kinkiet"},
-  {1, 19, RELAY_TRIGGER_LOW, "Salon 2"},
-  {2, 18, RELAY_TRIGGER_LOW, "Salon 1"},
-  {3, 14, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "Halogen - Taras"},
-  {4, 25, RELAY_TRIGGER_LOW, "Kuchnia"},
-  {5, 26, RELAY_TRIGGER_LOW, "Kuchnia - Kinkiet"},
-  {6, 31, RELAY_TRIGGER_LOW, "Jadalnia 2"},
-  {8, 34, RELAY_TRIGGER_LOW, "Garaż"},
-  {10, 3, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, "Halogen - wejście"},
-  {12, 32, RELAY_TRIGGER_LOW, "Hall 1"},
-  {14, 35, RELAY_TRIGGER_LOW, "Wiatrołap"},
-  {15, 24, RELAY_TRIGGER_LOW, "Kotłownia"},
-  {16, 27, RELAY_TRIGGER_LOW, "Ł1 - Taśma LED"},
-  {17, 22, RELAY_TRIGGER_LOW, "Ł1 - Kinkiet"},
-  {18, 23, RELAY_TRIGGER_LOW, "Ł1"},
-  {19, 8, RELAY_TRIGGER_LOW, "Klatka Schodowa"},
-  {21, 29, RELAY_TRIGGER_LOW, "Gabinet"},
-  {22, 9, RELAY_TRIGGER_LOW, "Hall 2"},
-  {24, 11, RELAY_TRIGGER_LOW, "Garderoba"},
-  {26, 7, RELAY_TRIGGER_LOW, "Pok. nad kuchnią 1"},
-  {27, 10, RELAY_TRIGGER_LOW, "Pok. nad salonem 2"},
-  {29, 5, RELAY_TRIGGER_LOW, "Ł2"},
-  {30, 6, RELAY_TRIGGER_LOW, "Ł2 - Taśma LED"},
-  {32, 12, RELAY_TRIGGER_LOW, "Sypialnia 2"},
-  {34, 28, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, "Halogen - Garaż"},
-  {35, 30, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "Ł1 - Wentylator"},
-  {36, 15, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "Halogen - wschód"},
-  {40, 2, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "Ł2 - wentylator"}
+  {1, 2, RELAY_TRIGGER_LOW, "RELAY 1"},
+  {2, 3, RELAY_TRIGGER_LOW, "RELAY 2"},
+  {3, 4, RELAY_TRIGGER_LOW, "RELAY 3"},
+  {4, 5, RELAY_TRIGGER_LOW, "RELAY 4"},
+  {5, 6, RELAY_TRIGGER_LOW, "RELAY 5"},
+  {6, 7, RELAY_TRIGGER_LOW | RELAY_STARTUP_OFF, "RELAY 6"},
+  {7, 8, RELAY_TRIGGER_LOW | RELAY_STARTUP_ON, "RELAY 7"}
 };
 
 // Row params: button pin - no support for Expander
 //             button type - [MONO_STABLE|BI_STABLE|DING_DONG|REED_SWITCH]
 //             click action relay ID - MUST be defined in myRelays
-//             long-press action relay ID (excluding BI_STABLE) - MUST be defined in myRelays
-//             double-click action relay ID - MUST be defined in myRelays
+//             long-press action relay ID - ignored for BI_STABLE, DING_DONG, REED_SWITCH
+//             double-click action relay ID - ignored for DING_DONG, REED_SWITCH
 //             button description - debug only, can be empty ("")
 ButtonDef myButtons[] = {
-  {A0,  MONO_STABLE, 0,  -1, -1, "Ł2"},
-  {A1,  BI_STABLE,   1,  -1, -1, "Salon prawy"},
-  {A2,  BI_STABLE,   2,  -1, -1, "Salon lewy"},
-  {A3,  BI_STABLE,   3,  -1, -1, "Taras"},
-  {A4,  BI_STABLE,   4,  -1, -1, "Kuchnia lewy"},
-  {A5,  BI_STABLE,   5,  -1, -1, "Kuchnia prawy"},
-  {A6,  BI_STABLE,   6,  -1, -1, "Hall I/Jadalnia prawy"},
-  {A7,  BI_STABLE,   17, -1, -1, "Hall I/Ł1 prawy"},
-  {A8,  MONO_STABLE, 8,  -1, -1, "Kotłownia/Garaż"},
-  {A9,  MONO_STABLE, 8,  -1, -1, "Garaż"},
-  {A10, BI_STABLE,   10, -1, -1, "Drzwi wejściowe"},
-  {A12, BI_STABLE,   12, -1, -1, "Hall I/Jadalnia lewy"},
-  {A13, BI_STABLE,   12, -1, -1, "Hall I/Wiatrołap"},
-  {A14, BI_STABLE,   14, -1, -1, "Wiatrołap/Hall I"},
-  {A15, MONO_STABLE, 15, 12, -1, "Kotłownia/Hall I"},
-  {53,  BI_STABLE,   16, -1, -1, "Hall I/Ł1 środek"},
-  {52,  MONO_STABLE, 17, -1, -1, "Ł1"},
-  {51,  BI_STABLE,   18, -1, -1, "Hall I/Ł1 lewy"},
-  {50,  BI_STABLE,   19, -1, -1, "Hall I/Schody prawy"},
-  {49,  BI_STABLE,   12, -1, -1, "Hall I/Schody lewy"},
-  {48,  BI_STABLE,   21, -1, 12, "Gabinet"},
-  {47,  BI_STABLE,   22, -1, -1, "Hall II/Schody prawy"},
-  {46,  BI_STABLE,   19, -1, -1, "Hall II/Schody lewy"},
-  {45,  BI_STABLE,   24, -1, -1, "Garderoba"},
-  {43,  BI_STABLE,   26, -1, -1, "Pok. nad kuchnią 1"},
-  {42,  BI_STABLE,   27, -1, -1, "Pok. nad salonem 2"},
-  {40,  BI_STABLE,   29, -1, -1, "Hall II/Ł2 lewy"},
-  {39,  BI_STABLE,   30, -1, -1, "Hall II/Ł2 prawy"},
-  {38,  BI_STABLE,   22, -1, -1, "Hall II/Sypialnia"},
-  {37,  BI_STABLE,   32, -1, -1, "Sypialnia 2"}
+  {A0,  MONO_STABLE, 1,  -1, -1, "BUTTON 1"},
+  {A1,  MONO_STABLE, 2,   6, -1, "BUTTON 2"},
+  {A2,  MONO_STABLE, 3,   1,  7, "BUTTON 3"},
+  {A3,  BI_STABLE,   4,  -1, -1, "BUTTON 4"},
+  {A4,  BI_STABLE,   5,  -1,  2, "BUTTON 5"}
 };
 //decisions: multiple relays for one button?
