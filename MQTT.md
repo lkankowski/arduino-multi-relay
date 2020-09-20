@@ -52,7 +52,7 @@ And from now you can re-create container using:
 ```
 docker stop nodered
 docker rm nodered
-docker run -dit -p 1880:1880 -v /docker/nodered:/data --group-add dialout --device=/dev/ttyACM0 --name nodered my-node-red
+docker run -dit -p 1880:1880 -v /docker/nodered:/data --group-add dialout --device=/dev/ttyACM0 --restart always --name nodered my-node-red
 #CTRL+C to leave docker - Node-Red will keep running in background
 ```
 
