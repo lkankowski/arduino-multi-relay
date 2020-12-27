@@ -1,3 +1,7 @@
+Check new version: https://github.com/lkankowski/arduino-multi-relay2.
+
+This version is not maintained anymore.
+
 # About
 Arduino program to handle relays and control them using switches.
 Single pair of relay and switch are configured in single line.
