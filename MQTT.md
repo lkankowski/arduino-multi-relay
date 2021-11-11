@@ -1,7 +1,7 @@
 # Introduction
 Connecting Arduino directly to HomeSystem application in some cases isn't enough.
 One of the drawback is that only one application can be connected over serial interface.
-There are some hacks, like `socat`, bo why don't use MQTT gateway?
+There are some hacks, like `socat`, but why don't use MQTT gateway?
 For me it is excelent choice, and also gives me opportunity to test another home application
 at the same time when Domoticz.
 
